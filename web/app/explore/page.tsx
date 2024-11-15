@@ -1,5 +1,6 @@
 "use client";
 
+import { Input } from "@/components/ui/input";
 import Image from "next/image";
 
 export default function Dummy() {
@@ -13,6 +14,7 @@ export default function Dummy() {
         alt="FIL-B Logo"
       />
       <div className="text-2xl text-white p-8 text-center">Explore page</div>
+      <Input placeholder="Search" />
     </>
   );
 }

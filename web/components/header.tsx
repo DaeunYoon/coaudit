@@ -30,7 +30,7 @@ const Header = () => {
               <div className="text-white font-bold">Sign</div>
             </Link>
             <button
-              className="text-black items-center inline-flex bg-white border-2 border-white duration-200 ease-in-out focus:outline-none hover:bg-black hover:shadow-none hover:text-white justify-center rounded-[20px] shadow-[5px_5px_black] text-center transform transition w-full text-md px-3 py-1"
+              className="text-black items-center inline-flex bg-white focus:outline-none hover:bg-red-400 hover:text-white justify-center rounded-md text-center w-full text-md px-3 py-1"
               type="button"
               onClick={handleLogOut}
             >

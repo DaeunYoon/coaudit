@@ -1,10 +1,12 @@
 "use client";
 
-import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
+import { useDynamicContext, useIsLoggedIn } from "@dynamic-labs/sdk-react-core";
 
 export default function Connect() {
   // Dynamic hooks
   const { sdkHasLoaded, setShowAuthFlow } = useDynamicContext();
+
+  const isLoggedIn = useIsLoggedIn();
 
   if (!sdkHasLoaded) {
     return null;
@@ -22,10 +24,10 @@ export default function Connect() {
       <a>
         <button
           type="button"
-          className="text-black items-center inline-flex bg-white border-2 border-black duration-200 ease-in-out focus:outline-none hover:bg-black hover:shadow-none hover:text-white justify-center rounded-[20px] shadow-[5px_5px_black] text-center transform transition w-full lg:px-8 lg:py-2 lg:text-xl px-8 py-2"
+          className="text-white items-center inline-flex bg-primary-accent border-2 border-black duration-200 ease-in-out focus:outline-none hover:bg-primary-accent-hover hover:text-white justify-center rounded-md text-center w-full lg:px-8 lg:py-2 text-xl px-8 py-2"
           onClick={() => setShowAuthFlow(true)}
         >
-          Launch dApp
+          {isLoggedIn ? "View dashboard" : "Launch dApp"}
         </button>
       </a>
     </div>
