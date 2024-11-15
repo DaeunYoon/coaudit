@@ -21,29 +21,24 @@ export default function Sign() {
   });
 
   return (
-    <div className="w-full min-h-screen bg-blue-600 absolute">
-      <Header />
-      <div className="flex flex-col justify-center items-center relative gap-8 pt-24 lg:pt-30 pb-10 lg:pb-40 w-full">
-        {sdkHasLoaded && isConnected && address ? (
-          <div className="flex flex-col gap-8">
-            <div>
-              {/* <ContractIntegration
+    <>
+      {sdkHasLoaded && isConnected && address ? (
+        <div className="flex flex-col gap-8">
+          <div>
+            {/* <ContractIntegration
                 account={address}
                 balance={data?.formatted}
               /> */}
-            </div>
-            <div>
-              <SignData />
-            </div>
           </div>
-        ) : (
-          <>
-            <Connect />
-          </>
-        )}
-      </div>
-
-      <Footer />
-    </div>
+          <div>
+            <SignData />
+          </div>
+        </div>
+      ) : (
+        <>
+          <Connect />
+        </>
+      )}
+    </>
   );
 }

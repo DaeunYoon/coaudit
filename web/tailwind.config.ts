@@ -9,15 +9,20 @@ const config: Config = {
   theme: {
     extend: {
       screens: {
-        'sm': '640px',    // Default Tailwind 'sm'
-        'md': '768px',    // Default Tailwind 'md'
-        'lg': '1024px',   // Default Tailwind 'lg'
+        sm: "640px", // Default Tailwind 'sm'
+        md: "768px", // Default Tailwind 'md'
+        lg: "1024px", // Default Tailwind 'lg'
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
-        "login-background": "url('/assets/images/loginBackground.png')"
+        "login-background": "url('/assets/images/loginBackground.png')",
+      },
+      colors: {
+        "background-primary": "#0f0f10",
+        "background-secondary": "#131315",
+        "background-tertiary": "#131315",
       },
     },
   },
