@@ -1,6 +1,6 @@
 "use client";
 
-import { config } from "@/lib/chains";
+import { Chain, config } from "@/lib/chains";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { Abi, isAddress, parseUnits } from "viem";
@@ -10,6 +10,16 @@ import { useState } from "react";
 import Button from "../atoms/button";
 import { getPublicClient, getWalletClient } from "@wagmi/core";
 
+import {
+  SignProtocolClient,
+  SpMode,
+  EvmChains,
+  IndexService,
+  decodeOnChainData,
+  DataLocationOnChain,
+} from "@ethsign/sp-sdk";
+import { schemaConfig } from "@/config";
+
 export default function CreateBountyModal({
   contractAddress,
   chainId,
@@ -18,6 +28,7 @@ export default function CreateBountyModal({
   chainId: string;
 }) {
   const [bountyAmount, setBountyAmount] = useState("0");
+  const [result, handleResult] = useState("");
 
   const { mutate: onCreate, isPending: isCreatingBounty } = useMutation({
     mutationFn: async () => {
@@ -31,23 +42,49 @@ export default function CreateBountyModal({
 
       try {
         const formattedAmount = parseUnits(bountyAmount, 18);
-        const walletClient = await getWalletClient(config);
-        const [account] = await walletClient.getAddresses();
-        const client = getPublicClient(config);
-        if (!client) throw new Error("Error retrieving public client");
 
-        const bountyArgs = {
-          account,
-          address: contractAddress as `0x${string}`,
-          abi: {} as Abi, // TODO: Add ABI
-          args: [chainId, contractAddress, formattedAmount], // TODO: Double check the args
-          functionName: "withdraw",
-          value: formattedAmount,
-        };
+        const client = new SignProtocolClient(SpMode.OnChain, {
+          chain: EvmChains.sepolia,
+        });
 
-        const { request } = await client.simulateContract(bountyArgs);
-        const hash = await walletClient.writeContract(request);
-        await waitForTransactionReceipt(walletClient, { hash });
+        const schemaInfo = schemaConfig[Chain.SEPOLIA];
+
+        const res2 = await client.getSchema(schemaInfo.bountySchema);
+        console.log(JSON.stringify(res2));
+
+        const res = await client.createAttestation(
+          {
+            schemaId: schemaInfo.bountySchema,
+            data: {
+              contractAddress,
+              chainId: Number(chainId),
+              title: "Create a bounty",
+            },
+            indexingValue: contractAddress?.toLowerCase() ?? "",
+          },
+          {
+            resolverFeesETH: formattedAmount,
+          }
+        );
+        handleResult(JSON.stringify(res));
+
+        // const walletClient = await getWalletClient(config);
+        // const [account] = await walletClient.getAddresses();
+        // const client = getPublicClient(config);
+        // if (!client) throw new Error("Error retrieving public client");
+
+        // const bountyArgs = {
+        //   account,
+        //   address: contractAddress as `0x${string}`,
+        //   abi: {} as Abi, // TODO: Add ABI
+        //   args: [chainId, contractAddress, formattedAmount], // TODO: Double check the args
+        //   functionName: "withdraw",
+        //   value: formattedAmount,
+        // };
+
+        // const { request } = await client.simulateContract(bountyArgs);
+        // const hash = await walletClient.writeContract(request);
+        // await waitForTransactionReceipt(walletClient, { hash });
 
         toast.success("Successfully created the bounty.", { id: toastId });
       } catch (error) {
@@ -72,11 +109,14 @@ export default function CreateBountyModal({
         </form>
         <h3 className="font-bold text-lg mb-4">Create a bug bounty</h3>
 
+        <p className="break-all">{result}</p>
+
         <div className="flex flex-col gap-4">
           <Input
             type="number"
             min={0}
             placeholder="Enter reward amount"
+            className="!text-white"
             onChange={(e) => setBountyAmount(e.target.value)}
           />
 

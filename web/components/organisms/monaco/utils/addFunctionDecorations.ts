@@ -1,7 +1,9 @@
+import { ParsedInformation } from "@/types";
 import type * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 
 export default function addFunctionDecorations(
-  model: monaco.editor.ITextModel
+  model: monaco.editor.ITextModel,
+  parsedData: ParsedInformation[]
 ) {
   const options: monaco.editor.IModelDecorationOptions = {
     inlineClassName: "function-link",

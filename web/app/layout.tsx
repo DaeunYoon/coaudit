@@ -27,7 +27,7 @@ export default function RootLayout({
           <Toaster
             position="top-center"
             toastOptions={{
-              style: { maxWidth: 425 },
+              style: { maxWidth: 425, zIndex: 9999 },
             }}
           />
           <ContextProvider>

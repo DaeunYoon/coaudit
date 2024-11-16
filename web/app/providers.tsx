@@ -17,21 +17,21 @@ import { config } from "@/lib/chains";
 
 const queryClient = new QueryClient();
 
-export const myEvmNetworks = [
-  {
-    chainId: 314159,
-    networkId: 314159,
-    iconUrls: [""],
-    name: "Filecoin Calibration",
-    nativeCurrency: {
-      decimals: 18,
-      name: "FIL",
-      symbol: "FIL",
-    },
-    rpcUrls: ["https://api.calibration.node.glif.io/rpc/v1"],
-    blockExplorerUrls: ["https://calibration.filfox.info/en"],
-  },
-];
+// export const myEvmNetworks = [
+//   {
+//     chainId: 314159,
+//     networkId: 314159,
+//     iconUrls: [""],
+//     name: "Filecoin Calibration",
+//     nativeCurrency: {
+//       decimals: 18,
+//       name: "FIL",
+//       symbol: "FIL",
+//     },
+//     rpcUrls: ["https://api.calibration.node.glif.io/rpc/v1"],
+//     blockExplorerUrls: ["https://calibration.filfox.info/en"],
+//   },
+// ];
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -66,9 +66,6 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         recommendedWallets: [{ walletKey: "metamask" }],
         environmentId: process.env.NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID || "",
         walletConnectors: [EthereumWalletConnectors],
-        overrides: {
-          evmNetworks: (networks) => mergeNetworks(myEvmNetworks, networks),
-        },
         eventsCallbacks: {
           onAuthSuccess,
           onLogout,
