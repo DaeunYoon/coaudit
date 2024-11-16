@@ -14,7 +14,6 @@ import CodeEditorTabs from './CodeEditorTabs';
 import CodeEditorBreadcrumbs from './CodeEditorBreadcrumbs';
 import CodeEditorSideBar from './CodeEditorSideBar';
 import { ParsedInformation } from '@/types';
-import addFunctionDecorations from './utils/addFunctionDecorations';
 import { Chain } from '@/lib/chains';
 
 export interface SmartContractExternalLibrary {
@@ -68,6 +67,7 @@ const CodeEditor = ({
     if (!parsedData || !monacoRef.current) return;
 
     const { monaco, editor } = monacoRef.current;
+    const model = editor.getModel();
 
     const addressDecorations = Object.entries(parsedData).map(
       ([contractPath, parsedData]) => {
@@ -135,25 +135,27 @@ const CodeEditor = ({
             addExternalLibraryWarningDecoration(model, libraries);
         });
       }
-      addFunctionDecorations(editor.getModel()!);
+      // addFunctionDecorations(editor.getModel()!);
 
-      monaco.languages.registerDefinitionProvider(language, {
-        provideDefinition(model, position, toen) {
-          console.log(model);
-          console.log(position);
-          return [
-            {
-              uri: monaco.Uri.file('contracts/NoDelegateCall.sol'),
-              range: {
-                startLineNumber: 1,
-                endLineNumber: 1,
-                startColumn: 7,
-                endColumn: 7,
-              },
-            },
-          ];
-        },
-      });
+      // monaco.languages.registerDefinitionProvider(language, {
+      //   provideDefinition(model, position, toen) {
+      //     console.log(model);
+      //     console.log(position);
+      //     return [
+      //       {
+      //         uri: monaco.Uri.file('contracts/NoDelegateCall.sol'),
+      //         range: {
+      //           startLineNumber: 1,
+      //           endLineNumber: 1,
+      //           startColumn: 7,
+      //           endColumn: 7,
+      //         },
+      //       },
+      //       options: {
+      //         isWholeLine: false,
+      //       },
+      //     };
+      //   });
 
       monaco.languages.registerLinkProvider(language, {
         provideLinks: (model: monaco.editor.ITextModel) => {

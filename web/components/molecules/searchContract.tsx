@@ -1,23 +1,23 @@
-'use client';
+"use client";
 
-import Button from '@/components/atoms/button';
+import Button from "@/components/atoms/button";
 
-import { Chain } from '@/lib/chains';
-import { useMutation } from '@tanstack/react-query';
-import { useRouter } from 'next/dist/client/components/navigation';
-import { useState } from 'react';
-import toast from 'react-hot-toast';
-import { isAddress } from 'viem';
-import Select, { SelectOption } from '../atoms/select';
-import { Input } from '../atoms/input';
+import { Chain } from "@/lib/chains";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/dist/client/components/navigation";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import { isAddress } from "viem";
+import Select, { SelectOption } from "../atoms/select";
+import { Input } from "../atoms/input";
 
 const chainDropwdown: SelectOption[] = [
-  { label: 'ETH Mainnet', value: Chain.MAINNET },
-  { label: 'Base', value: Chain.BASE },
+  { label: "ETH Mainnet", value: Chain.MAINNET },
+  { label: "Base", value: Chain.BASE },
 ];
 
 export default function SearchContract() {
-  const [contractAddress, setContractAddress] = useState('');
+  const [contractAddress, setContractAddress] = useState("");
   const [chain, setChain] = useState(Chain.MAINNET.toString());
 
   const router = useRouter();
@@ -26,14 +26,13 @@ export default function SearchContract() {
     mutationFn: async () => {
       try {
         if (!contractAddress || !isAddress(contractAddress))
-          return toast.error('Please enter a valid contract address.');
+          return toast.error("Please enter a valid contract address.");
 
-        console.log(chain);
-        if (!chain) return toast.error('Please select a chain.');
+        if (!chain) return toast.error("Please select a chain.");
 
         router.push(`/explore/${chain}/${contractAddress}`);
       } catch (error) {
-        toast.error('Something went wrong while unwrapping.');
+        toast.error("Something went wrong while unwrapping.");
         console.error(error);
       }
     },

@@ -5,6 +5,7 @@ import { base, mainnet, sepolia } from "viem/chains";
 export enum Chain {
   MAINNET = 1,
   BASE = 8453,
+  SEPOLIA = 11155111,
 }
 
 export const chains: readonly [ViemChain, ...ViemChain[]] = [base, mainnet];
@@ -24,14 +25,18 @@ export const ChainSettings: Record<
     name: "Base",
     color: "#3372fa",
   },
+  [Chain.SEPOLIA]: {
+    name: "Sepolia",
+    color: "#fff",
+  },
 };
 
 export const config = createConfig({
   chains,
   transports: {
-    [mainnet.id]: http(),
+    // [mainnet.id]: http(),
     [sepolia.id]: http(),
-    [base.id]: http(),
+    // [base.id]: http(),
   },
   connectors: [],
 });
