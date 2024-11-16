@@ -159,7 +159,6 @@ const CodeEditor = ({
 
       monaco.languages.registerLinkProvider(language, {
         provideLinks: (model: monaco.editor.ITextModel) => {
-          console.log('search for pragma');
           const searchQuery = 'pragma'; // Regex to find function definitions
           const matches = model.findMatches(
             searchQuery,
@@ -171,7 +170,6 @@ const CodeEditor = ({
           );
 
           const links = matches.map((match) => {
-            console.log(match);
             const startPosition = model.getPositionAt(
               match.range.getStartPosition().lineNumber
             );
@@ -193,8 +191,6 @@ const CodeEditor = ({
           return { links }; // Return an object with links property
         },
         resolveLink: (link: any) => {
-          console.log('resolveLink', link);
-
           return null;
         },
       });
