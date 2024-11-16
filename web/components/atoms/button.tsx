@@ -17,14 +17,16 @@ export default function Button({
 }) {
   const buttonStyle = types[style];
   return (
-    <button
-      disabled={loading}
-      className={classNames("btn btn-primary w-fit", buttonStyle, className)}
-      type="button"
-      onClick={onClick}
-    >
-      {children}
-    </button>
+    <div className="w-fit">
+      <button
+        disabled={loading}
+        className={classNames("btn btn-primary", buttonStyle, className)}
+        type="button"
+        onClick={onClick}
+      >
+        {children}
+      </button>
+    </div>
   );
 }
 
