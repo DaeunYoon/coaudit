@@ -33,6 +33,7 @@ export const config = createConfig({
     [sepolia.id]: http(),
     [base.id]: http(),
   },
+  connectors: [],
 });
 
 export const getExplorerTransactionUri = (chainId: number, address: string) => {

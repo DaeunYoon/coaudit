@@ -1,29 +1,21 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { http } from "viem";
-import { filecoin, filecoinCalibration } from "viem/chains";
+
 import {
   DynamicContextProvider,
   mergeNetworks,
   OnAuthSuccess,
 } from "@dynamic-labs/sdk-react-core";
 import { EthereumWalletConnectors } from "@dynamic-labs/ethereum";
-import { createConfig, WagmiProvider } from "wagmi";
+import { WagmiProvider } from "wagmi";
 import { DynamicWagmiConnector } from "@dynamic-labs/wagmi-connector";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import LoadingPage from "@/components/loadingPage";
+import { config } from "@/lib/chains";
 
 const queryClient = new QueryClient();
-
-export const wagmiConfig = createConfig({
-  chains: [filecoin, filecoinCalibration],
-  transports: {
-    [filecoin.id]: http(),
-    [filecoinCalibration.id]: http(),
-  },
-});
 
 export const myEvmNetworks = [
   {
@@ -71,6 +63,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <DynamicContextProvider
       settings={{
+        recommendedWallets: [{ walletKey: "metamask" }],
         environmentId: process.env.NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID || "",
         walletConnectors: [EthereumWalletConnectors],
         overrides: {
@@ -82,7 +75,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         },
       }}
     >
-      <WagmiProvider config={wagmiConfig}>
+      <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
           <DynamicWagmiConnector>
             {isLoading ? <LoadingPage /> : children}

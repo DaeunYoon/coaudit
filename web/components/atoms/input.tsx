@@ -1,14 +1,14 @@
 import * as React from "react";
 
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
-  ({ className, type, ...props }) => {
+  ({ className, type, placeholder, ...props }) => {
     return (
       <label className="flex items-center gap-2 text-white">
         <input
           {...props}
-          type="text"
+          type={type || "text"}
           className="input input-bordered w-full text-white"
-          placeholder="Search"
+          placeholder={placeholder || "search"}
         />
       </label>
     );
