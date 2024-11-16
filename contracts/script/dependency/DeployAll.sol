@@ -40,7 +40,7 @@ library DeployAll {
           maxValidFor: 0,
           hook: bountyHook,
           timestamp: uint64(block.timestamp),
-          data: '[{"name":"contractAddress","type": "address"},{"name":"chainId","type":"uint"},{"name":"title","type":"string"}]'
+          data: '{"name":"bounty","description":"Bug bounty for smart contract","data":[{"name":"contractAddress","type":"address"},{"name":"chainId","type":"uint256"},{"name":"title","type":"string"}]}'
         });
 
         instance.bountySchemaId = sp.register(bountySchema, new bytes(0));
@@ -53,7 +53,7 @@ library DeployAll {
             maxValidFor: 0,
             hook: reportHook,
             timestamp: uint64(block.timestamp),
-            data: '[{"name":"bountyId","type":"uint64"},{"name":"finding","type":"string"}]'
+            data: '{"name":"report","description":"Bug report for bounty","data":[{"name":"finding","type":"string"}]}'
         });
 
         instance.reportSchemaId = sp.register(reportSchema, new bytes(0));
@@ -66,7 +66,7 @@ library DeployAll {
             maxValidFor: 0,
             hook: reportStatusHook,
             timestamp: uint64(block.timestamp),
-            data: '[{"name":"reportId","type": "uint64"},{"name":"amount","type":"uint256"}]'
+            data: '{"name":"reportStatus","description":"Bug bounty report status","data":[{"name":"amount","type":"uint256"}]}'
         });
 
         instance.reportStatusSchemaId = sp.register(reportStatusSchema, new bytes(0));

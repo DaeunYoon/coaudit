@@ -37,8 +37,7 @@ contract ReportHook is ISPHook {
 
     function _didReceiveAttestation(uint64 attestationId) private view {
         Attestation memory a = sp.getAttestation(attestationId);
-        (uint64 bountyId, ) = abi.decode(a.data, (uint64, string));
-        require(_isValidBounty(bountyId) == true, "ReportHook/bounty-not-exist");
+        require(_isValidBounty(a.linkedAttestationId) == true, "ReportHook/bounty-not-exist");
     }
 
     function didReceiveAttestation(

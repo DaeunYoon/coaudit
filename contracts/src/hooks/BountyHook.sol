@@ -62,7 +62,7 @@ contract BountyHook is ISPHook {
         require(amount > 0, "BountyHook/zero-bounty-amount");
 
         Attestation memory a = sp.getAttestation(attestationId);
-        (address contractAddress, uint chainId, ) = abi.decode(a.data, (address, uint, string));
+        (address contractAddress, uint256 chainId, ) = abi.decode(a.data, (address, uint256, string));
         require(chainToContractToBounty[chainId][contractAddress] == 0, "BountyHook/bounty-already-exist-for-contract");
         chainToContractToBounty[chainId][contractAddress] = attestationId;
         bountyIdToBalance[attestationId] = amount;
@@ -70,7 +70,7 @@ contract BountyHook is ISPHook {
 
     function _didReceiveRevocation(uint64 attestationId) private {
         Attestation memory a = sp.getAttestation(attestationId);
-        (address contractAddress, uint chainId, ) = abi.decode(a.data, (address, uint, string));
+        (address contractAddress, uint256 chainId, ) = abi.decode(a.data, (address, uint256, string));
         
         require(
             chainToContractToBounty[chainId][contractAddress] == attestationId,

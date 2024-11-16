@@ -1,24 +1,24 @@
-"use client";
+'use client';
 
-import { useQuery } from "@tanstack/react-query";
-import toast from "react-hot-toast";
-import axios from "axios";
-import { usePathname } from "next/navigation";
-import { baseUrl } from "@/utils/constants";
-import formatFilePath from "@/components/organisms/monaco/utils/formatFilePath";
-import CodeEditor from "@/components/organisms/monaco/CodeEditor";
-import { ParsedInformation } from "@/types";
-import Card from "@/components/atoms/card";
-import { Chain, chains, getExplorerAddressUri } from "@/lib/chains";
-import Link from "next/link";
-import Button from "@/components/atoms/button";
-import CreateBountyModal from "@/components/molecules/createBountyModal";
-import CreateBugModal from "@/components/molecules/createBugModal";
+import { useQuery } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+import axios from 'axios';
+import { usePathname } from 'next/navigation';
+import { baseUrl } from '@/utils/constants';
+import formatFilePath from '@/components/organisms/monaco/utils/formatFilePath';
+import CodeEditor from '@/components/organisms/monaco/CodeEditor';
+import { ParsedInformation } from '@/types';
+import Card from '@/components/atoms/card';
+import { Chain, chains, getExplorerAddressUri } from '@/lib/chains';
+import Link from 'next/link';
+import Button from '@/components/atoms/button';
+import CreateBountyModal from '@/components/molecules/createBountyModal';
+import CreateBugModal from '@/components/molecules/createBugModal';
 
 export default function Explorer() {
   const pathname = usePathname();
-  const chain = pathname.split("/")[2];
-  const address = pathname.split("/")[3];
+  const chain = pathname.split('/')[2];
+  const address = pathname.split('/')[3];
 
   function getEditorData(contractInfo: any[] | undefined) {
     if (!contractInfo) {
@@ -35,7 +35,7 @@ export default function Explorer() {
   }
 
   const { data: editorData, isLoading: isLoadingContract } = useQuery({
-    queryKey: ["contract", chain, address],
+    queryKey: ['contract', chain, address],
     queryFn: async () => {
       try {
         const url = `${baseUrl}/api/contract/${chain}/${address}`;
@@ -44,7 +44,7 @@ export default function Explorer() {
 
         return editorData;
       } catch (e) {
-        toast.error("Something went wrong fetching contract information.");
+        toast.error('Something went wrong fetching contract information.');
         console.error(e);
         return null;
       }
@@ -53,12 +53,12 @@ export default function Explorer() {
   });
 
   const { data: parsedData } = useQuery({
-    queryKey: ["contract", "parse", chain, address],
+    queryKey: ['contract', 'parse', chain, address],
     queryFn: async () => {
       const loadingToastId = toast.loading(
-        "Fetching parsed data information...",
+        'Fetching parsed data information...',
         {
-          id: "parsedData",
+          id: 'parsedData',
         }
       );
 
@@ -66,12 +66,12 @@ export default function Explorer() {
         const url = `${baseUrl}/api/contract/parse/${chain}/${address}`;
         const { data: parsedData } = await axios.get(url, {});
 
-        toast.success("Successfully fethced parsed function data!", {
+        toast.success('Successfully fethced parsed function data!', {
           id: loadingToastId,
         });
-        return (parsedData?.data || []) as ParsedInformation[];
+        return (parsedData?.data || {}) as Record<string, ParsedInformation>;
       } catch (e) {
-        toast.error("Something went wrong fetching parsed data information.", {
+        toast.error('Something went wrong fetching parsed data information.', {
           id: loadingToastId,
         });
         console.error(e);
@@ -91,11 +91,9 @@ export default function Explorer() {
     return `0x${hash.slice(2, first)}...${hash.slice(-last)}`;
   };
 
-  console.log(parsedData);
-
   return (
     <div className="w-[1200px] pt-32 pb-12 flex flex-col gap-8">
-      <Card className={"bg-sidebar-background flex items-center"}>
+      <Card className={'bg-sidebar-background flex items-center'}>
         <div className="flex flex-col gap-2  w-[25%]">
           <h2 className="text-sm text-white">Chain</h2>
           <p className="text-white text-lg">
@@ -107,7 +105,7 @@ export default function Explorer() {
           <h2 className="text-sm text-white">Address</h2>
           <p className="text-white">
             <Link
-              target={"_blank"}
+              target={'_blank'}
               href={getExplorerAddressUri(Number(chain), address)}
               className="text-blue-300 text-xl"
             >
@@ -133,7 +131,7 @@ export default function Explorer() {
       </Card>
 
       <div className="flex gap-6">
-        <Card className={"bg-sidebar-background flex gap-6"}>
+        <Card className={'bg-sidebar-background flex gap-6'}>
           <div className="flex flex-col gap-2">
             <h2 className="text-xl text-white mb-2">Bounties</h2>
             <p className="text-white">No bounties created</p>
@@ -141,7 +139,7 @@ export default function Explorer() {
               className="py-0"
               onClick={() => {
                 const modal: any = document.getElementById(
-                  "create-bounty-modal"
+                  'create-bounty-modal'
                 );
                 modal?.showModal() as any;
               }}
@@ -151,7 +149,7 @@ export default function Explorer() {
           </div>
         </Card>
 
-        <Card className={"bg-sidebar-background flex gap-6"}>
+        <Card className={'bg-sidebar-background flex gap-6'}>
           <div className="flex flex-col gap-2">
             <h2 className="text-xl text-white mb-2">Bug reports</h2>
             <div className="text-white flex justify-center flex-col gap-3 w-full">
@@ -159,7 +157,7 @@ export default function Explorer() {
               <Button
                 onClick={() => {
                   const modal: any =
-                    document.getElementById("create-bug-modal");
+                    document.getElementById('create-bug-modal');
                   modal?.showModal() as any;
                 }}
               >

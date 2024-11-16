@@ -34,14 +34,15 @@ contract ReportStatusHook is ISPHook {
 
     function _didReceiveAttestation(uint64 attestationId) private {
         Attestation memory a = sp.getAttestation(attestationId);
-        (uint64 reportId, uint256 amount) = abi.decode(a.data, (uint64, uint256));
+        uint64 reportId = a.linkedAttestationId;
+        (uint256 amount) = abi.decode(a.data, (uint256));
         require(reportToReportStatus[reportId] == 0, "ReportStatusHook/report-already-has-status");
         
         Attestation memory report = sp.getAttestation(reportId);
         require(report.schemaId == aduitManager.getSchemaId("report"), "ReportStatusHook/report-not-exist");  
         require(!report.revoked, "ReportStatusHook/report-revoked");
        
-        (uint64 bountyId, ) = abi.decode(report.data, (uint64, string));
+        uint64 bountyId = report.linkedAttestationId;
 
         Attestation memory bounty = sp.getAttestation(bountyId);
         require(!bounty.revoked, "ReportStatusHook/bounty-inactivated");
@@ -76,13 +77,13 @@ contract ReportStatusHook is ISPHook {
 
     function _didReceiveRevocation(uint64 attestationId) private {
       Attestation memory a = sp.getAttestation(attestationId);
-      (uint64 reportId, uint256 amount) = abi.decode(a.data, (uint64, uint256));
+      (uint256 amount) = abi.decode(a.data, (uint256));
       require(
-          reportToReportStatus[reportId] != 0,
+          reportToReportStatus[a.linkedAttestationId] != 0,
           "ReportStatusHook/attestation-id-does-not-match"
       );
       require(amount == 0, "ReportStatusHook/report-already-rewarded");
-      reportToReportStatus[reportId] = 0;
+      reportToReportStatus[a.linkedAttestationId] = 0;
     }
 
     function didReceiveRevocation(
