@@ -1,4 +1,4 @@
-import Connect from "@/components/fil-frame/connect";
+import Connect from "@/components/organisms/connect";
 export default function Home() {
   return <Connect />;
 }

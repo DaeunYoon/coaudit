@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
 import { FaCopy } from "react-icons/fa";
-import Connect from "@components/fil-frame/connect";
-import ContractIntegration from "@/components/fil-frame/contractIntegration/contractIntegration";
-import AccountDetails from "@/components/fil-frame/accountDetails/showAccountDetails";
+import Connect from "@/components/organisms/connect";
+import ContractIntegration from "@/components/organisms/contractIntegration/contractIntegration";
+import AccountDetails from "@/components/organisms/accountDetails/showAccountDetails";
 import { useAccount, useBalance } from "wagmi";
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 

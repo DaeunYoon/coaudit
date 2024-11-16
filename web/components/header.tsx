@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useDynamicContext, useIsLoggedIn } from "@dynamic-labs/sdk-react-core";
+import Button from "./atoms/button";
 
 const Header = () => {
   const { sdkHasLoaded, handleLogOut } = useDynamicContext();
@@ -29,13 +30,7 @@ const Header = () => {
             <Link href="/sign">
               <div className="text-white font-bold">Sign</div>
             </Link>
-            <button
-              className="text-black items-center inline-flex bg-white focus:outline-none hover:bg-red-400 hover:text-white justify-center rounded-md text-center w-full text-md px-3 py-1"
-              type="button"
-              onClick={handleLogOut}
-            >
-              Log Out
-            </button>
+            <Button onClick={handleLogOut}>Log Out</Button>
           </div>
         </div>
       )}
