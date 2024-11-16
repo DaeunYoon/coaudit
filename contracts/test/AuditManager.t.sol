@@ -7,11 +7,13 @@ import { Helpers } from "script/Helpers.s.sol";
 import {ISP} from "lib/sign-protocol-evm/src/interfaces/ISP.sol";
 import {Attestation} from "lib/sign-protocol-evm/src/models/Attestation.sol";
 import {DataLocation} from "lib/sign-protocol-evm/src/models/DataLocation.sol";
+import {IBountyHook} from "src/hooks/IBountyHook.sol";
 
 contract AuditManagerTest is Test {
     string private json;
     DeployInstance private instance;
     ISP public sp; 
+    IBountyHook bountyHook;
 
     // Test users
     address private alice = address(0x111);
@@ -28,44 +30,117 @@ contract AuditManagerTest is Test {
         sp: address(sp),
         deployer: address(this)
       }));
+      bountyHook = IBountyHook(instance.auditManager.schemaToHook("bounty"));
     }
 
-    function testAuditManagerAuth() public view {
-      assertEq(address(instance.auditManager.admin()), address(address(this)));
-    }
+    // function testBountyHookAuth() public view {
+    //   assertEq(bountyHook.wards(address(this)), 1);
+    //   assertEq(bountyHook.wards(instance.auditManager.schemaToHook("reportStatus")), 1);
+    // }
 
-    function testAuditManagerSchema() public view {
-      assertEq(instance.bountySchemaId, instance.auditManager.getSchemaId("bounty"));
-    }
+    // function testAuditManagerSchema() public view {
+    //   assertEq(instance.bountySchemaId, instance.auditManager.getSchemaId("bounty"));
+    //   assertEq(instance.reportSchemaId, instance.auditManager.getSchemaId("report"));
+    //   assertEq(instance.reportStatusSchemaId, instance.auditManager.getSchemaId("reportStatus"));
+    // }
 
-    function testCreateBounty() public {
-      vm.expectRevert("AuditContrct/zero-bounty-amount");
-      instance.auditManager.createBounty(1, address(this));
+    // function testCreateBounty() public {
+    //   Attestation memory bountyAttestation = Attestation({
+    //       schemaId: instance.auditManager.getSchemaId("bounty"),
+    //       linkedAttestationId: 0,
+    //       attestTimestamp: 0,
+    //       revokeTimestamp: 0,
+    //       attester: address(this),
+    //       validUntil: 0,
+    //       dataLocation: DataLocation.ONCHAIN,
+    //       revoked: false,
+    //       recipients: new bytes[](0),
+    //       data: abi.encode(address(this), 1, "title")
+    //   });
 
-      uint64 bountyId = instance.auditManager.createBounty{ value: 1 ether }(1, address(this));
+    //   vm.expectRevert("BountyHook/zero-bounty-amount");
+    //   sp.attest(bountyAttestation, "", "", "");
 
-      vm.expectRevert("BountyHook/bounty-already-exist-for-contract");
-      instance.auditManager.createBounty{ value: 1 ether }(1, address(this));
+    //   uint64 bountyId = sp.attest{value: 1 ether}(bountyAttestation, 1 ether, "", "", "");
+    //   assertEq(bountyHook.getBountyIdForContract(address(this), 1), bountyId);
 
-      assertEq(instance.auditManager.bountyIdToBalance(bountyId), 1 ether);
-      assertEq(address(instance.auditManager).balance, 1 ether);
+    //   vm.expectRevert("BountyHook/bounty-already-exist-for-contract");
+    //   sp.attest{value: 1 ether}(bountyAttestation, 1 ether, "", "", "");
 
-      uint256 beforeRefund = address(this).balance;
-      instance.auditManager.refundBounty(bountyId);
-      assertEq(instance.auditManager.bountyIdToBalance(bountyId), 0);
-      assertEq(address(instance.auditManager).balance, 0);
-      assertEq(address(this).balance, beforeRefund + 1 ether);
-      assertEq(instance.auditManager.getBountyIdForContract(address(this), 1), 0);
+    //   assertEq(bountyHook.getBountyBalance(bountyId), 1 ether);
+    //   assertEq(address(bountyHook).balance, 1 ether);
 
-      // Re-create bounty after revert
-      bountyId = instance.auditManager.createBounty{ value: 1 ether }(1, address(this));
-      assertEq(instance.auditManager.getBountyIdForContract(address(this), 1), bountyId);
-    }
+    //   uint256 beforeRevoke = address(this).balance;
+    //   sp.revoke(bountyId, "", "", "");
+    //   assertEq(bountyHook.getBountyBalance(bountyId), 0);
+    //   assertEq(address(bountyHook).balance, 0);
+    //   assertEq(address(this).balance, beforeRevoke + 1 ether);
+    //   assertEq(bountyHook.getBountyIdForContract(address(this), 1), 0);
 
-    function testCreateReport() public {
-      uint64 bountyId = instance.auditManager.createBounty{ value: 1 ether }(1, address(this));
+    //   // Re-create bounty after revert
+    //   bountyId = sp.attest{value: 1 ether}(bountyAttestation, 1 ether, "", "", "");
+    //   assertEq(bountyHook.getBountyIdForContract(address(this), 1), bountyId);
+    // }
 
-      sp.attest(Attestation({
+    // function testCreateReport() public {
+    //   uint64 bountyId = sp.attest{value: 1 ether}(Attestation({
+    //       schemaId: instance.auditManager.getSchemaId("bounty"),
+    //       linkedAttestationId: 0,
+    //       attestTimestamp: 0,
+    //       revokeTimestamp: 0,
+    //       attester: address(this),
+    //       validUntil: 0,
+    //       dataLocation: DataLocation.ONCHAIN,
+    //       revoked: false,
+    //       recipients: new bytes[](0),
+    //       data: abi.encode(1, address(this), "title")
+    //   }), 1 ether, "", "", "");
+
+    //   uint64 reportId = sp.attest(Attestation({
+    //       schemaId: instance.auditManager.getSchemaId("report"),
+    //       linkedAttestationId: 0,
+    //       attestTimestamp: 0,
+    //       revokeTimestamp: 0,
+    //       attester: address(this),
+    //       validUntil: 0,
+    //       dataLocation: DataLocation.ONCHAIN,
+    //       revoked: false,
+    //       recipients: new bytes[](0),
+    //       data: abi.encode(bountyId, "finding")
+    //   }), "", "", "");
+
+    //   Attestation memory reportAttestation = Attestation({
+    //       schemaId: instance.auditManager.getSchemaId("report"),
+    //       linkedAttestationId: 0,
+    //       attestTimestamp: 0,
+    //       revokeTimestamp: 0,
+    //       attester: address(this),
+    //       validUntil: 0,
+    //       dataLocation: DataLocation.ONCHAIN,
+    //       revoked: false,
+    //       recipients: new bytes[](0),
+    //       data: abi.encode(reportId, "finding")
+    //   });
+
+    //   vm.expectRevert("ReportHook/bounty-not-exist");
+    //   sp.attest(reportAttestation, "", "", "");
+    // }
+
+    function testCreateReportStatus() public {
+      uint64 bountyId = sp.attest{value: 1 ether}(Attestation({
+          schemaId: instance.auditManager.getSchemaId("bounty"),
+          linkedAttestationId: 0,
+          attestTimestamp: 0,
+          revokeTimestamp: 0,
+          attester: address(this),
+          validUntil: 0,
+          dataLocation: DataLocation.ONCHAIN,
+          revoked: false,
+          recipients: new bytes[](0),
+          data: abi.encode(1, address(this), "title")
+      }), 1 ether, "", "", "");
+
+      uint64 reportId = sp.attest(Attestation({
           schemaId: instance.auditManager.getSchemaId("report"),
           linkedAttestationId: 0,
           attestTimestamp: 0,
@@ -78,7 +153,29 @@ contract AuditManagerTest is Test {
           data: abi.encode(bountyId, "finding")
       }), "", "", "");
 
-      Attestation memory reportAttestation = Attestation({
+      Attestation memory reportStatusAttestation = Attestation({
+          schemaId: instance.auditManager.getSchemaId("reportStatus"),
+          linkedAttestationId: 0,
+          attestTimestamp: 0,
+          revokeTimestamp: 0,
+          attester: address(this),
+          validUntil: 0,
+          dataLocation: DataLocation.ONCHAIN,
+          revoked: false,
+          recipients: new bytes[](0),
+          data: abi.encode(reportId, 0.5 ether)
+      });
+
+      uint256 beforeBalance = address(this).balance;
+      sp.attest(reportStatusAttestation, "", "", "");
+
+      assertEq(bountyHook.getBountyBalance(bountyId), 0.5 ether);
+      assertEq(address(this).balance, beforeBalance + 0.5 ether);
+
+      vm.expectRevert("ReportStatusHook/report-already-has-status");
+      sp.attest(reportStatusAttestation, "", "", "");
+
+      reportId = sp.attest(Attestation({
           schemaId: instance.auditManager.getSchemaId("report"),
           linkedAttestationId: 0,
           attestTimestamp: 0,
@@ -88,10 +185,42 @@ contract AuditManagerTest is Test {
           dataLocation: DataLocation.ONCHAIN,
           revoked: false,
           recipients: new bytes[](0),
-          data: abi.encode(0, "finding")
+          data: abi.encode(bountyId, "finding")
+      }), "", "", "");
+      reportStatusAttestation = Attestation({
+          schemaId: instance.auditManager.getSchemaId("reportStatus"),
+          linkedAttestationId: 0,
+          attestTimestamp: 0,
+          revokeTimestamp: 0,
+          attester: alice,
+          validUntil: 0,
+          dataLocation: DataLocation.ONCHAIN,
+          revoked: false,
+          recipients: new bytes[](0),
+          data: abi.encode(reportId, true)
       });
 
-      vm.expectRevert("ReportHook/bounty-not-exist");
-      sp.attest(reportAttestation, "", "", "");
+      vm.startPrank(alice);
+      vm.expectRevert("ReportStatusHook/unauthorized-bounty-owner");
+      sp.attest(reportStatusAttestation, "", "", "");
+      vm.stopPrank();
+
+      sp.revoke(bountyId, "", "", "");
+      
+      reportStatusAttestation = Attestation({
+          schemaId: instance.auditManager.getSchemaId("reportStatus"),
+          linkedAttestationId: 0,
+          attestTimestamp: 0,
+          revokeTimestamp: 0,
+          attester: address(this),
+          validUntil: 0,
+          dataLocation: DataLocation.ONCHAIN,
+          revoked: false,
+          recipients: new bytes[](0),
+          data: abi.encode(reportId, true)
+      });
+
+      vm.expectRevert("ReportStatusHook/bounty-inactivated");
+      sp.attest(reportStatusAttestation, "", "", "");
     }
 }

@@ -7,6 +7,7 @@ import {Schema} from "lib/sign-protocol-evm/src/models/Schema.sol";
 import {DataLocation} from "lib/sign-protocol-evm/src/models/DataLocation.sol";
 import {BountyHook} from "src/hooks/BountyHook.sol";
 import {ReportHook} from "src/hooks/ReportHook.sol";
+import {ReportStatusHook} from "src/hooks/ReportStatusHook.sol";
 import {AuditManager} from "src/AuditManager.sol";
 import {console} from "forge-std/console.sol";
 
@@ -39,7 +40,7 @@ library DeployAll {
           maxValidFor: 0,
           hook: bountyHook,
           timestamp: uint64(block.timestamp),
-          data: '[{"name":"contractAddress","type": "address"},{"name":"chainId","type":"uint"},{"name":"owner","type":"address"}]'
+          data: '[{"name":"contractAddress","type": "address"},{"name":"chainId","type":"uint"},{"name":"title","type":"string"}]'
         });
 
         instance.bountySchemaId = sp.register(bountySchema, new bytes(0));
@@ -57,16 +58,15 @@ library DeployAll {
 
         instance.reportSchemaId = sp.register(reportSchema, new bytes(0));
 
+        ReportStatusHook reportStatusHook = new ReportStatusHook(address(instance.auditManager), params.sp);
         Schema memory reportStatusSchema = Schema({
             registrant: params.deployer,
             revocable: true,
             dataLocation: DataLocation.ONCHAIN,
             maxValidFor: 0,
-            // TODO: only original bounty owner can create
-            // TODO: only one can be created for each reportSchema
-            hook: ISPHook(address(0)),
+            hook: reportStatusHook,
             timestamp: uint64(block.timestamp),
-            data: '[{"name":"reportId","type": "uint64"},{"name":"isAccepted","type":"bool"}]'
+            data: '[{"name":"reportId","type": "uint64"},{"name":"amount","type":"uint256"}]'
         });
 
         instance.reportStatusSchemaId = sp.register(reportStatusSchema, new bytes(0));
@@ -75,5 +75,8 @@ library DeployAll {
         instance.auditManager.setSchema("bounty", instance.bountySchemaId);
         instance.auditManager.setSchema("report", instance.reportSchemaId);
         instance.auditManager.setSchema("reportStatus", instance.reportStatusSchemaId);
+
+        // 4. Set `reportStatusHook` as admin for `bountyHook`
+        bountyHook.rely(address(reportStatusHook));
     }
 }
