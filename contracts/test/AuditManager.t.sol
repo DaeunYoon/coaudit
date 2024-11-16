@@ -53,7 +53,7 @@ contract AuditManagerTest is Test {
       assertEq(instance.auditManager.getBountyIdForContract(address(this), 1), 0);
 
       // Re-create bounty after revert
-      bountyId = instance.auditManager.createBounty{value: 1 ether}(1, address(this));
+      bountyId = instance.auditManager.createBounty{ value: 1 ether }(1, address(this));
       assertEq(instance.auditManager.getBountyIdForContract(address(this), 1), bountyId);
     }
 }
