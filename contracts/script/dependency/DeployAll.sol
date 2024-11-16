@@ -6,6 +6,7 @@ import {ISPHook} from "lib/sign-protocol-evm/src/interfaces/ISPHook.sol";
 import {Schema} from "lib/sign-protocol-evm/src/models/Schema.sol";
 import {DataLocation} from "lib/sign-protocol-evm/src/models/DataLocation.sol";
 import {BountyHook} from "src/hooks/BountyHook.sol";
+import {ReportHook} from "src/hooks/ReportHook.sol";
 import {AuditManager} from "src/AuditManager.sol";
 import {console} from "forge-std/console.sol";
 
@@ -43,13 +44,13 @@ library DeployAll {
 
         instance.bountySchemaId = sp.register(bountySchema, new bytes(0));
 
+        ReportHook reportHook = new ReportHook(address(instance.auditManager), params.sp);
         Schema memory reportSchema = Schema({
             registrant: params.deployer,
             revocable: true,
             dataLocation: DataLocation.ONCHAIN,
             maxValidFor: 0,
-            // TODO: Signature can be created only when active bounty program exist
-            hook: ISPHook(address(0)),
+            hook: reportHook,
             timestamp: uint64(block.timestamp),
             data: '[{"name":"bountyId","type":"uint64"},{"name":"finding","type":"string"}]'
         });

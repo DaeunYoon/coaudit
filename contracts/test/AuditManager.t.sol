@@ -4,10 +4,14 @@ pragma solidity ^0.8.18;
 import { Test } from "forge-std/Test.sol";
 import { DeployAll, DeployParams, DeployInstance } from "script/dependency/DeployAll.sol";
 import { Helpers } from "script/Helpers.s.sol";
+import {ISP} from "lib/sign-protocol-evm/src/interfaces/ISP.sol";
+import {Attestation} from "lib/sign-protocol-evm/src/models/Attestation.sol";
+import {DataLocation} from "lib/sign-protocol-evm/src/models/DataLocation.sol";
 
 contract AuditManagerTest is Test {
     string private json;
     DeployInstance private instance;
+    ISP public sp; 
 
     // Test users
     address private alice = address(0x111);
@@ -19,8 +23,9 @@ contract AuditManagerTest is Test {
 
     function setUp() public {
       json = Helpers.readInput();
+      sp = ISP(vm.parseJsonAddress(json, ".SP"));
       instance = DeployAll.deploy(DeployParams({
-        sp: vm.parseJsonAddress(json, ".SP"),
+        sp: address(sp),
         deployer: address(this)
       }));
     }
@@ -55,5 +60,38 @@ contract AuditManagerTest is Test {
       // Re-create bounty after revert
       bountyId = instance.auditManager.createBounty{ value: 1 ether }(1, address(this));
       assertEq(instance.auditManager.getBountyIdForContract(address(this), 1), bountyId);
+    }
+
+    function testCreateReport() public {
+      uint64 bountyId = instance.auditManager.createBounty{ value: 1 ether }(1, address(this));
+
+      sp.attest(Attestation({
+          schemaId: instance.auditManager.getSchemaId("report"),
+          linkedAttestationId: 0,
+          attestTimestamp: 0,
+          revokeTimestamp: 0,
+          attester: address(this),
+          validUntil: 0,
+          dataLocation: DataLocation.ONCHAIN,
+          revoked: false,
+          recipients: new bytes[](0),
+          data: abi.encode(bountyId, "finding")
+      }), "", "", "");
+
+      Attestation memory reportAttestation = Attestation({
+          schemaId: instance.auditManager.getSchemaId("report"),
+          linkedAttestationId: 0,
+          attestTimestamp: 0,
+          revokeTimestamp: 0,
+          attester: address(this),
+          validUntil: 0,
+          dataLocation: DataLocation.ONCHAIN,
+          revoked: false,
+          recipients: new bytes[](0),
+          data: abi.encode(0, "finding")
+      });
+
+      vm.expectRevert("ReportHook/bounty-not-exist");
+      sp.attest(reportAttestation, "", "", "");
     }
 }
