@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity ^0.8.18;
 
-import { VmSafe } from "forge-std/Vm.sol";
+import {VmSafe} from "forge-std/Vm.sol";
 
 library Helpers {
     VmSafe private constant vm = VmSafe(address(uint160(uint256(keccak256("hevm cheat code")))));
