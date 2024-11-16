@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { Chain, config } from "@/lib/chains";
-import { useMutation } from "@tanstack/react-query";
-import toast from "react-hot-toast";
-import { Abi, isAddress, parseUnits } from "viem";
-import { waitForTransactionReceipt } from "viem/actions";
-import { Input } from "../atoms/input";
-import { useState } from "react";
-import Button from "../atoms/button";
-import { getPublicClient, getWalletClient } from "@wagmi/core";
+import { Chain, config } from '@/lib/chains';
+import { useMutation } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+import { Abi, isAddress, parseUnits } from 'viem';
+import { waitForTransactionReceipt } from 'viem/actions';
+import { Input } from '../atoms/input';
+import { useState } from 'react';
+import Button from '../atoms/button';
+import { getPublicClient, getWalletClient } from '@wagmi/core';
 
 import {
   SignProtocolClient,
@@ -17,8 +17,8 @@ import {
   IndexService,
   decodeOnChainData,
   DataLocationOnChain,
-} from "@ethsign/sp-sdk";
-import { schemaConfig } from "@/config";
+} from '@ethsign/sp-sdk';
+import { schemaConfig } from '@/config';
 
 export default function CreateBountyModal({
   contractAddress,
@@ -27,18 +27,18 @@ export default function CreateBountyModal({
   contractAddress: string;
   chainId: string;
 }) {
-  const [bountyAmount, setBountyAmount] = useState("0");
-  const [result, handleResult] = useState("");
+  const [bountyAmount, setBountyAmount] = useState('0');
+  const [result, handleResult] = useState('');
 
   const { mutate: onCreate, isPending: isCreatingBounty } = useMutation({
     mutationFn: async () => {
-      const toastId = toast.loading("Creating a bounty...");
+      const toastId = toast.loading('Creating a bounty...');
 
       if (!contractAddress || !isAddress(contractAddress) || !chainId)
-        return toast.error("Invalid parameters");
+        return toast.error('Invalid parameters');
 
-      if (typeof Number(bountyAmount) !== "number")
-        return toast.error("Invalid bounty amount");
+      if (typeof Number(bountyAmount) !== 'number')
+        return toast.error('Invalid bounty amount');
 
       try {
         const formattedAmount = parseUnits(bountyAmount, 18);
@@ -49,18 +49,15 @@ export default function CreateBountyModal({
 
         const schemaInfo = schemaConfig[Chain.SEPOLIA];
 
-        const res2 = await client.getSchema(schemaInfo.bountySchema);
-        console.log(JSON.stringify(res2));
-
         const res = await client.createAttestation(
           {
             schemaId: schemaInfo.bountySchema,
             data: {
               contractAddress,
               chainId: Number(chainId),
-              title: "Create a bounty",
+              title: 'Create a bounty',
             },
-            indexingValue: contractAddress?.toLowerCase() ?? "",
+            indexingValue: contractAddress?.toLowerCase() ?? '',
           },
           {
             resolverFeesETH: formattedAmount,
@@ -68,27 +65,9 @@ export default function CreateBountyModal({
         );
         handleResult(JSON.stringify(res));
 
-        // const walletClient = await getWalletClient(config);
-        // const [account] = await walletClient.getAddresses();
-        // const client = getPublicClient(config);
-        // if (!client) throw new Error("Error retrieving public client");
-
-        // const bountyArgs = {
-        //   account,
-        //   address: contractAddress as `0x${string}`,
-        //   abi: {} as Abi, // TODO: Add ABI
-        //   args: [chainId, contractAddress, formattedAmount], // TODO: Double check the args
-        //   functionName: "withdraw",
-        //   value: formattedAmount,
-        // };
-
-        // const { request } = await client.simulateContract(bountyArgs);
-        // const hash = await walletClient.writeContract(request);
-        // await waitForTransactionReceipt(walletClient, { hash });
-
-        toast.success("Successfully created the bounty.", { id: toastId });
+        toast.success('Successfully created the bounty.', { id: toastId });
       } catch (error) {
-        toast.error("Something went wrong while creating the bounty.", {
+        toast.error('Something went wrong while creating the bounty.', {
           id: toastId,
         });
         console.error(error);
