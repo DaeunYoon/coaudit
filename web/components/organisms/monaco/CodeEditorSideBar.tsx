@@ -46,7 +46,7 @@ const CodeEditorSideBar = ({
         }`}
       >
         <div>
-          <p className="text-text-on-dark py-2">Explorer</p>
+          <p className="text-text-on-dark py-2 px-2">Explorer</p>
           <CodeEditorFileExplorer
             data={data}
             onFileSelect={handleFileSelect}

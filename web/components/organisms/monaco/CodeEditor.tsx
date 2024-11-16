@@ -1,7 +1,7 @@
 import type { EditorProps } from "@monaco-editor/react";
 import MonacoEditor from "@monaco-editor/react";
 import type * as monaco from "monaco-editor/esm/vs/editor/editor.api";
-import React from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 
 import type { File, Monaco } from "./types";
 
@@ -13,6 +13,7 @@ import * as themes from "./utils/themes";
 import CodeEditorTabs from "./CodeEditorTabs";
 import CodeEditorBreadcrumbs from "./CodeEditorBreadcrumbs";
 import CodeEditorSideBar from "./CodeEditorSideBar";
+import { ParsedInformation } from "@/types";
 
 export interface SmartContractExternalLibrary {
   address_hash: string;
@@ -28,27 +29,30 @@ const EDITOR_OPTIONS: EditorProps["options"] = {
   dragAndDrop: false,
 };
 
-const TABS_HEIGHT = 35;
-const BREADCRUMBS_HEIGHT = 22;
 const EDITOR_HEIGHT = 500;
 
 interface Props {
   data: Array<File>;
-  remappings?: Array<string>;
   libraries?: Array<SmartContractExternalLibrary>;
-  language?: string;
+  language: string;
   mainFile?: string;
   contractName?: string;
+  parsedData?: ParsedInformation[];
 }
 
 const CodeEditor = ({
   data,
-  remappings,
   libraries,
   language,
   mainFile,
   contractName,
+  parsedData,
 }: Props) => {
+  const monacoRef = useRef<{
+    editor: monaco.editor.IStandaloneCodeEditor;
+    monaco: Monaco;
+  } | null>(null);
+
   const [instance, setInstance] = React.useState<Monaco | undefined>();
   const [editor, setEditor] = React.useState<
     monaco.editor.IStandaloneCodeEditor | undefined
@@ -56,7 +60,33 @@ const CodeEditor = ({
   const [index, setIndex] = React.useState(0);
   const [tabs, setTabs] = React.useState([data[index].file_path]);
 
-  const editorLanguage = language === "vyper" ? "elixir" : "sol";
+  useEffect(() => {
+    if (!parsedData || !monacoRef.current) return;
+
+    const { monaco, editor } = monacoRef.current;
+
+    //Get all function definitions
+    // const regularImportMatches = model.findMatches(
+    //   "^import ('|\")(.+)('|\")",
+    //   false,
+    //   true,
+    //   false,
+    //   null,
+    //   true
+    // );
+
+    // const regularImportDecorations: Array<monaco.editor.IModelDeltaDecoration> =
+    // regularImportMatches.map(({ range }) => ({
+    //   range: {
+    //     ...range,
+    //     startColumn: range.startColumn + 8,
+    //     endColumn: range.endColumn - 1,
+    //   },
+    //   options,
+    // }));
+
+    // For each function call, find the corresponding definition
+  }, [parsedData]);
 
   React.useEffect(() => {
     instance?.editor.setTheme("blockscout-dark");
@@ -64,9 +94,12 @@ const CodeEditor = ({
 
   const handleEditorDidMount = React.useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor, monaco: Monaco) => {
+      monacoRef.current = { editor, monaco };
+
       setInstance(monaco);
       setEditor(editor);
 
+      monaco.languages.register({ id: language });
       monaco.editor.defineTheme("blockscout-light", themes.light);
       monaco.editor.defineTheme("blockscout-dark", themes.dark);
       monaco.editor.setTheme("blockscout-dark");
@@ -79,12 +112,12 @@ const CodeEditor = ({
         .map((file) =>
           monaco.editor.createModel(
             file.source_code,
-            editorLanguage,
+            "sol",
             monaco.Uri.parse(file.file_path)
           )
         );
 
-      if (language === "solidity") {
+      if (language) {
         loadedModels.concat(newModels).forEach((model) => {
           contractName &&
             mainFile === model.uri.path &&
@@ -94,6 +127,48 @@ const CodeEditor = ({
             addExternalLibraryWarningDecoration(model, libraries);
         });
       }
+      console.log("before registerLinkProvider");
+      monaco.languages.registerLinkProvider(language, {
+        provideLinks: (model: monaco.editor.ITextModel) => {
+          console.log("search for pragma");
+          const searchQuery = "pragma"; // Regex to find function definitions
+          const matches = model.findMatches(
+            searchQuery,
+            false,
+            false,
+            false,
+            null,
+            false
+          );
+
+          const links = matches.map((match) => {
+            console.log(match);
+            const startPosition = model.getPositionAt(
+              match.range.getStartPosition().lineNumber
+            );
+            const endPosition = model.getPositionAt(
+              match.range.getEndPosition().lineNumber
+            );
+
+            return {
+              range: new monaco.Range(
+                startPosition.lineNumber,
+                startPosition.column,
+                endPosition.lineNumber,
+                endPosition.column
+              ),
+              url: `http://localhost:3000/explore/1/0x1F98431c8aD98523631AE4a59f267346ea31F984`, // Custom URL format for navigation
+            };
+          });
+
+          return { links }; // Return an object with links property
+        },
+        resolveLink: (link: any) => {
+          console.log("resolveLink", link);
+
+          return null;
+        },
+      });
 
       editor.addAction({
         id: "close-tab",
@@ -175,7 +250,7 @@ const CodeEditor = ({
       <div className="h-[600px] w-full">
         <MonacoEditor
           className="editor-container"
-          language={editorLanguage}
+          language={"sol"}
           path={data[index].file_path}
           defaultValue={data[index].source_code}
           options={EDITOR_OPTIONS}
@@ -200,7 +275,7 @@ const CodeEditor = ({
         <MonacoEditor
           className="editor-container"
           height={`${EDITOR_HEIGHT}px`}
-          language={editorLanguage}
+          language={"sol"}
           path={data[index].file_path}
           defaultValue={data[index].source_code}
           options={EDITOR_OPTIONS}
@@ -220,4 +295,4 @@ const CodeEditor = ({
   );
 };
 
-export default React.memo(CodeEditor);
+export default CodeEditor;

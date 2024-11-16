@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { baseUrl } from "@/utils/constants";
 import formatFilePath from "@/components/organisms/monaco/utils/formatFilePath";
 import CodeEditor from "@/components/organisms/monaco/CodeEditor";
+import { ParsedInformation } from "@/types";
 
 export default function Explorer() {
   const pathname = usePathname();
@@ -32,10 +33,8 @@ export default function Explorer() {
     queryFn: async () => {
       try {
         const url = `${baseUrl}/api/contract/${chain}/${address}`;
-        const { data } = await axios.get(url, {});
-
-        const editorData = getEditorData(data.data);
-        console.log(editorData);
+        const { data: conractData } = await axios.get(url, {});
+        const editorData = getEditorData(conractData.data);
 
         return editorData;
       } catch (e) {
@@ -47,24 +46,55 @@ export default function Explorer() {
     enabled: !!chain && !!address,
   });
 
+  const { data: parsedData } = useQuery({
+    queryKey: ["contract", "parse", chain, address],
+    queryFn: async () => {
+      const loadingToastId = toast.loading(
+        "Fetching parsed data information...",
+        {
+          id: "parsedData",
+        }
+      );
+
+      try {
+        const url = `${baseUrl}/api/contract/parse/${chain}/${address}`;
+        const { data: parsedData } = await axios.get(url, {});
+
+        toast.success("Successfully fethced parsed function data!", {
+          id: loadingToastId,
+        });
+        return (parsedData?.data || []) as ParsedInformation[];
+      } catch (e) {
+        toast.error("Something went wrong fetching parsed data information.", {
+          id: loadingToastId,
+        });
+        console.error(e);
+        return undefined;
+      }
+    },
+    staleTime: 1000 * 60 * 60,
+    enabled: !!chain && !!address,
+  });
+
   return (
-    <div className="w-[1200px]">
-      <div className="text-white">Contract info here:</div>
+    <div className="w-[1200px] pt-32 pb-12">
       <div className="text-white">Chain: {chain}</div>
       <div className="text-white mb-8">Address: {address}</div>
 
-      {editorData ? (
+      {isLoadingContract ? (
+        <div className="h-[600px] w-[1200px] flex justify-center items-center bg-background-secondary">
+          <span className="loading loading-spinner loading-lg text-white"></span>
+        </div>
+      ) : editorData ? (
         <CodeEditor
           key={address}
           data={editorData}
-          // remappings={editorData?.compiler_settings?.remappings}
-          // libraries={editorData?.external_libraries ?? undefined}
-          // language={editorData?.language ?? undefined}
+          parsedData={parsedData}
+          language="solidity"
           mainFile={editorData[0]?.file_path}
-          contractName={"Contract Name"}
         />
       ) : (
-        "Loading..."
+        ""
       )}
     </div>
   );

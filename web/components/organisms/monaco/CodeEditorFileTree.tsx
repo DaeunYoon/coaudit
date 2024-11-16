@@ -6,6 +6,7 @@ import type { FileTree } from "./types";
 import CodeEditorMainFileIndicator from "./CodeEditorMainFileIndicator";
 import CodeEditorFileIcon from "./CodeEditorFileIcon";
 import Image from "next/image";
+import classNames from "classnames";
 
 interface Props {
   tree: FileTree;
@@ -34,7 +35,7 @@ const CodeEditorFileTree = ({
   // };
 
   return (
-    <div>
+    <div className="px-[2px]">
       {tree.map((leaf, index) => {
         const leafName = (
           <span className="overflow-hidden text-ellipsis whitespace-nowrap">
@@ -89,12 +90,15 @@ const CodeEditorFileTree = ({
           >
             {mainFile === leaf.file_path && (
               <CodeEditorMainFileIndicator
-                className={`absolute top-[${(22 - 12) / 2}px] left-[${
-                  26 - 12 - 2 + level * 8
-                }px]`}
+                className={`absolute top-[${(22 - 12) / 2}px] left-[2px]`}
               />
             )}
-            <CodeEditorFileIcon fileName={leaf.name} className="mr-2" />
+            <CodeEditorFileIcon
+              fileName={leaf.name}
+              className={classNames(
+                `mr-2 ${mainFile === leaf.file_path ? "ml-5" : ""}`
+              )}
+            />
             {leafName}
           </div>
         );

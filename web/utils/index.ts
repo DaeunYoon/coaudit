@@ -16,8 +16,8 @@ export const chainConfigs: Readonly<
     endpoint: "https://eth.blockscout.com/",
   },
   [Chain.BASE]: {
-    chainId: 1,
-    name: "Ethereum",
+    chainId: 8453,
+    name: "Base",
     endpoint: "https://eth.blockscout.com/",
   },
 };

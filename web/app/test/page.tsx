@@ -1,10 +1,10 @@
-'use client';
-import { useEffect, useState } from 'react';
-import { ParsedInformation } from '@/types';
+"use client";
+import { useEffect, useState } from "react";
+import { ParsedInformation } from "@/types";
 
 export default function Test() {
-  const address = '0x000000000022D473030F116dDEE9F6B43aC78BA3';
-  const chain = 'ethereum';
+  const address = "0x000000000022D473030F116dDEE9F6B43aC78BA3";
+  const chain = 1;
   const [parsedInfos, setParsedInfo] = useState<
     ParsedInformation | undefined
   >();

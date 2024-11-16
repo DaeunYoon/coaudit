@@ -87,6 +87,10 @@
   }
 }
 
+.highlight {
+  background: #ffff00;
+}
+
 .editor-container {
   position: "absolute";
   top: 0;
