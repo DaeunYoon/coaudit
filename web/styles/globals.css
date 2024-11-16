@@ -86,3 +86,59 @@
     @apply bg-background text-foreground;
   }
 }
+
+.editor-container {
+  position: "absolute";
+  top: 0;
+  left: 0;
+  width: 600px;
+  height: "100%";
+}
+.monaco-editor {
+  border-bottom-left-radius: 5px;
+}
+.monaco-editor .overflow-guard {
+  border-bottom-left-radius: 5px;
+}
+.monaco-editor .core-guide {
+  z-index: 1,
+}
+
+.monaco-editor .findMatch {
+  background-color: "rgba(198, 246, 213, 1)";
+}
+.highlight {
+  background-color: "rgba(198, 246, 213, 1)";
+}
+
+&&.meta-pressed .import-link:hover, &&.meta-pressed .import-link:hover + .import-link
+  {
+    color: "#4299E1";
+    text-decoration: "underline";
+    cursor: "pointer";
+  }
+.risk-warning-primary {
+  background-color: "#FEEBCB";
+}
+.risk-warning {
+  background-color: "#FFFAF0";
+}
+.main-contract-header {
+  background-color: "rgba(233, 216, 253, 1)";
+}
+.main-contract-body {
+  background-color: "rgba(250, 245, 255, 1)";
+}
+.main-contract-glyph{
+  z-index: 1;
+  background: "url(/static/contract_star.png) no-repeat center center";
+  background-size: "12px";
+  cursor: "pointer";
+}
+
+.monaco-editor {
+  border-radius: 5px;
+}
+.monaco-editor .overflow-guard {
+  border-radius: 5px;
+}

@@ -26,6 +26,21 @@ const config: Config = {
         "background-tertiary": "#131315",
         "primary-accent": "#6e56cf",
         "primary-accent-hover": "#836add",
+
+        //Editor colours
+        "editor-background": "#1a1b1b",
+        "sidebar-background": "#222222",
+
+        "active-tab": "#1a1b1b",
+        "inactive-tab": "#2d2d2d",
+
+        "text-on-dark": "#a0aec0",
+
+        "inactive-sidebar": "#37373d",
+        "sidebar-hover": "rgba(184, 184, 184, 0.31)",
+
+        "breadcrumbs-foreground": "rgb(97, 97, 97)",
+
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
