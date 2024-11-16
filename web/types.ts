@@ -56,9 +56,9 @@ export interface ParsedInformation {
 export interface Contract {
   address: string;
   chain: string;
-  sourceCode: string;
-  contractPath: string;
   contractName: string;
+  contractPath: string;
+  sourceCode: string;
   abi: string;
   compilerVersion: string;
   optimizationUsed: number;
@@ -67,7 +67,7 @@ export interface Contract {
   evmVersion: string;
   library: string;
   licenseType: string;
-  proxy: string;
+  proxy: boolean;
   implementation: string;
   swarmSource: string;
 }
