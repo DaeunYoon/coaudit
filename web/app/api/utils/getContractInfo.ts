@@ -1,11 +1,22 @@
-import { getChainConfigs } from './index';
+import { getChainConfigs } from '@/utils';
 import axios from 'axios';
 import type { Contract, SupportedChain } from '@/types';
+import getRedis from './getRedis';
 
 export default async function getContractInfo(
   address: string,
   chain: SupportedChain
 ): Promise<Contract[]> {
+  const redis = getRedis();
+
+  const redisKey = `contracts:${chain}:${address}`;
+
+  const cachedContracts = (await redis.get(redisKey)) as Contract[];
+
+  if (cachedContracts?.length > 0) {
+    return cachedContracts;
+  }
+
   const { endpoint, apiKey } = getChainConfigs(chain);
   if (!apiKey) {
     throw new Error('No API key');
@@ -16,12 +27,10 @@ export default async function getContractInfo(
   try {
     const { data } = await axios.get(fetchingURL);
 
-    const contracts = [];
-
     const source = data.result[0].SourceCode;
     const slicedSource = source.substring(1, source.length - 1);
 
-    const contractBase = {
+    const baseContract = {
       address: address,
       chain: chain,
       contractName: data.result[0].ContractName,
@@ -38,14 +47,17 @@ export default async function getContractInfo(
       swarmSource: data.result[0].SwarmSource,
     };
 
+    const contracts: Contract[] = [];
+
     try {
       // When there are more than one contract
       const parsedSource = JSON.parse(slicedSource);
       const contractPaths = Object.keys(parsedSource.sources);
       for (const contractPath of contractPaths) {
         const eachSource = parsedSource.sources[contractPath].content;
+
         contracts.push({
-          ...contractBase,
+          ...baseContract,
           contractPath,
           sourceCode: eachSource,
         });
@@ -53,13 +65,15 @@ export default async function getContractInfo(
     } catch (error) {
       // When there are only one contract
       contracts.push({
-        ...contractBase,
-        contractPath: `/${contractBase.contractName}.sol`,
+        ...baseContract,
         sourceCode: data.result[0].SourceCode,
+        contractPath: `/${data.result[0].ContractName}.sol`,
       });
     }
 
-    // update contracts to database
+    // add contracts to redis
+    await redis.set(redisKey, contracts);
+
     return contracts;
   } catch (error: any) {
     console.error(error);

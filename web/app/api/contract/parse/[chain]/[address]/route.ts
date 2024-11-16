@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import getParsedContract from '@/utils/getParsedContract';
-import getContractInfo from '@/utils/getContractInfo';
+import getParsedContract from '@/app/api/utils/getParsedContract';
+import getContractInfo from '@/app/api/utils/getContractInfo';
 import { SupportedChain, ParsedInformation, Contract } from '@/types';
 
 interface Params {
