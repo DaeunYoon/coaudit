@@ -24,7 +24,7 @@ $ forge build
 ### Test
 
 ```shell
-$ forge test
+$ forge test -vvv --fork-url sepolia
 ```
 
 ### Format
@@ -48,8 +48,9 @@ $ anvil
 ### Deploy
 
 ```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
+$ forge script script/Deploy.s.sol:Deploy --fork-url sepolia
 ```
+(note: this will only simulate deployment, unless you add `--verify --broadcast` to actually broadcast the transactions and then verify contracts)
 
 ### Cast
 
