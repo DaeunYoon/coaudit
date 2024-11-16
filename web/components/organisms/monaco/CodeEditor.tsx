@@ -1,7 +1,7 @@
 import type { EditorProps } from '@monaco-editor/react';
 import MonacoEditor from '@monaco-editor/react';
 import type * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 
 import type { File, Monaco } from './types';
 
@@ -15,7 +15,6 @@ import CodeEditorBreadcrumbs from './CodeEditorBreadcrumbs';
 import CodeEditorSideBar from './CodeEditorSideBar';
 import { ParsedInformation } from '@/types';
 import addFunctionDecorations from './utils/addFunctionDecorations';
-import Link from 'next/link';
 import { Chain } from '@/lib/chains';
 
 export interface SmartContractExternalLibrary {
@@ -63,7 +62,7 @@ const CodeEditor = ({
     monaco.editor.IStandaloneCodeEditor | undefined
   >();
   const [index, setIndex] = React.useState(0);
-  const [tabs, setTabs] = React.useState([data[index].file_path]);
+  const [tabs, setTabs] = React.useState([data[index]?.file_path]);
 
   useEffect(() => {
     if (!parsedData || !monacoRef.current) return;
@@ -222,9 +221,9 @@ const CodeEditor = ({
     (index: number, lineNumber?: number) => {
       setIndex(index);
       setTabs((prev) =>
-        prev.some((item) => item === data[index].file_path)
+        prev.some((item) => item === data[index]?.file_path)
           ? prev
-          : [...prev, data[index].file_path]
+          : [...prev, data[index]?.file_path]
       );
       if (lineNumber !== undefined && !Object.is(lineNumber, NaN)) {
         window.setTimeout(() => {
@@ -254,7 +253,7 @@ const CodeEditor = ({
           const isActive =
             _isActive !== undefined
               ? _isActive
-              : data[index].file_path === path;
+              : data[index]?.file_path === path;
 
           if (isActive) {
             const nextActiveIndex = data.findIndex(
@@ -272,6 +271,10 @@ const CodeEditor = ({
     },
     [data, index]
   );
+
+  if (data.length < 1) {
+    return <div>No contract was found!</div>;
+  }
 
   if (data.length === 1) {
     return (
