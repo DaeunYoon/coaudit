@@ -1,27 +1,27 @@
-import { parse, visit } from '@solidity-parser/parser';
+import { parse, visit } from "@solidity-parser/parser";
 import {
   ASTNode,
   BaseASTNode,
   VariableDeclaration,
   FunctionDefinition,
-} from '@solidity-parser/parser/dist/src/ast-types';
+} from "@solidity-parser/parser/dist/src/ast-types";
 import {
   AddressInfo,
-  SupportedChain,
   Contract,
   LocalFunctionDefinition,
   LocalFunctionCall,
-} from '@/types';
-import loadContractLibraries from './loadContractLibraries';
-import { Contract as EthersContract, utils } from 'ethers';
-import { FormatTypes } from 'ethers/lib/utils';
+} from "@/types";
+import loadContractLibraries from "./loadContractLibraries";
+import { Contract as EthersContract, utils } from "ethers";
+import { FormatTypes } from "ethers/lib/utils";
 
-import getAbiIfReturnsAddress from './getAbiIfReturnsAddress';
-import getProvider from './getProvider';
-import getContractInfo from './getContractInfo';
+import getAbiIfReturnsAddress from "./getAbiIfReturnsAddress";
+import getProvider from "./getProvider";
+import getContractInfo from "./getContractInfo";
+import { Chain } from "@/lib/chains";
 
 const isAddress = (val: string) => {
-  return val.length === 42 && val.startsWith('0x');
+  return val.length === 42 && val.startsWith("0x");
 };
 
 function getAst(val: string) {
@@ -35,7 +35,7 @@ function getAst(val: string) {
 
 function getFlatLocationInfo(node: ASTNode | BaseASTNode) {
   if (!node.loc) {
-    throw new Error('No location info');
+    throw new Error("No location info");
   }
   return {
     locStartLine: node.loc.start.line,
@@ -64,7 +64,7 @@ const findMatchingId = (
   }
   let relevantDeclarationRangeStart: number = 0;
   stateVarsWithMatchingName.forEach((key) => {
-    const [_varName, rangeStart] = key.split(' ');
+    const [_varName, rangeStart] = key.split(" ");
     if (
       targetRangeStart >= Number(rangeStart) &&
       Number(rangeStart) > relevantDeclarationRangeStart
@@ -76,7 +76,7 @@ const findMatchingId = (
 };
 
 const getVariableId = (varName: string, node: ASTNode) =>
-  `${varName} ${node.range ? node.range[0] : ''}`;
+  `${varName} ${node.range ? node.range[0] : ""}`;
 
 const getFunctionDefinitionInfo = (
   node: FunctionDefinition,
@@ -86,7 +86,7 @@ const getFunctionDefinitionInfo = (
   return {
     functionName: node.name,
     functionParameters: node.parameters.map((param) => {
-      if (param.typeName?.type === 'ElementaryTypeName') {
+      if (param.typeName?.type === "ElementaryTypeName") {
         return param.typeName.name;
       }
       return param.typeName?.type;
@@ -133,7 +133,7 @@ export default async (contractInfo: Contract) => {
           locEndCol: node.loc.end.column,
           rangeFrom: node.range ? node.range[0] : undefined,
           rangeTo: node.range ? node.range[1] : undefined,
-          source: 'hardcoded',
+          source: "hardcoded",
         });
       }
     },
@@ -144,13 +144,13 @@ export default async (contractInfo: Contract) => {
   visit(ast, {
     FunctionCall(node) {
       const parameterTypes = node.arguments.map((arg) =>
-        arg.type === 'ElementaryTypeName' || arg.type === 'Identifier'
+        arg.type === "ElementaryTypeName" || arg.type === "Identifier"
           ? arg.name
           : arg.type
       );
 
       const functionName =
-        node.expression.type === 'Identifier' ? node.expression.name : '';
+        node.expression.type === "Identifier" ? node.expression.name : "";
 
       const functionDefinition =
         localFunctionDefinitions.find(
@@ -180,7 +180,7 @@ export default async (contractInfo: Contract) => {
       const initValue = node.initialValue;
       if (
         !initValue ||
-        initValue.type !== 'NumberLiteral' ||
+        initValue.type !== "NumberLiteral" ||
         !isAddress(initValue.number)
       ) {
         return;
@@ -193,7 +193,7 @@ export default async (contractInfo: Contract) => {
       const variableDeclaration = nodeVars[0];
       if (
         !variableDeclaration ||
-        variableDeclaration.type !== 'VariableDeclaration'
+        variableDeclaration.type !== "VariableDeclaration"
       ) {
         return;
       }
@@ -208,13 +208,13 @@ export default async (contractInfo: Contract) => {
         ...getFlatLocationInfo(varDeclarationIdentifier),
         contractPath,
         contractName,
-        source: 'variable',
+        source: "variable",
         address: initValue.number,
       });
       // If variable declaraton is in block (curly brackets) - search it for the name occurence
       if (
         !variableDeclarationParent ||
-        variableDeclarationParent.type !== 'Block'
+        variableDeclarationParent.type !== "Block"
       ) {
         return;
       }
@@ -235,7 +235,7 @@ export default async (contractInfo: Contract) => {
             contractPath,
             address: initValue.number,
             contractName,
-            source: 'variable',
+            source: "variable",
           });
         },
       });
@@ -246,7 +246,7 @@ export default async (contractInfo: Contract) => {
       const initValue = node.initialValue;
       if (
         !initValue ||
-        initValue.type !== 'NumberLiteral' ||
+        initValue.type !== "NumberLiteral" ||
         !isAddress(initValue.number)
       ) {
         return;
@@ -259,7 +259,7 @@ export default async (contractInfo: Contract) => {
       const variableDeclaration = nodeVars[0];
       if (
         !variableDeclaration ||
-        variableDeclaration.type !== 'VariableDeclaration'
+        variableDeclaration.type !== "VariableDeclaration"
       ) {
         return;
       }
@@ -275,7 +275,7 @@ export default async (contractInfo: Contract) => {
         contractPath,
         contractName,
         address: initValue.number,
-        source: 'state',
+        source: "state",
       });
       discoveredStateVars[
         getVariableId(varName, variableDeclaration.identifier)
@@ -296,7 +296,7 @@ export default async (contractInfo: Contract) => {
       }
       let relevantDeclarationRangeStart: number = 0;
       stateVarsWithMatchingName.forEach((key) => {
-        const [_varName, rangeStart] = key.split(' ');
+        const [_varName, rangeStart] = key.split(" ");
         if (
           targetRangeStart >= Number(rangeStart) &&
           Number(rangeStart) > relevantDeclarationRangeStart
@@ -318,19 +318,14 @@ export default async (contractInfo: Contract) => {
         contractPath,
         contractName,
         address: addressValue,
-        source: 'state',
+        source: "state",
       });
     },
   });
-  const loadedLibraries = await loadContractLibraries(
-    address,
-    chain as SupportedChain
-  );
+  const loadedLibraries = await loadContractLibraries(address, chain);
   const monitoredFunctions: Record<string, string[]> = {};
   for (const [libraryName, libraryAddress] of Object.entries(loadedLibraries)) {
-    const { abi } = (
-      await getContractInfo(libraryAddress, chain as SupportedChain)
-    )[0];
+    const { abi } = (await getContractInfo(libraryAddress, chain))[0];
     if (!abi) {
       continue;
     }
@@ -341,21 +336,21 @@ export default async (contractInfo: Contract) => {
     }
     const relevantFunctions = ifaceElements.filter(
       (element) =>
-        element.startsWith('function') && element.includes('returns (address)')
+        element.startsWith("function") && element.includes("returns (address)")
     );
     const relevantFunctionNames = relevantFunctions.map(
-      (element) => element.split(' ')[1].split('(')[0]
+      (element) => element.split(" ")[1].split("(")[0]
     );
     monitoredFunctions[libraryName] = relevantFunctionNames;
   }
   visit(ast, {
     MemberAccess(node, parent) {
       const memberAccessExpression = node.expression;
-      if (!parent || parent.type !== 'FunctionCall') {
+      if (!parent || parent.type !== "FunctionCall") {
         return;
       }
       // if something like `libraryName.functionName()`
-      if (memberAccessExpression.type === 'Identifier') {
+      if (memberAccessExpression.type === "Identifier") {
         if (
           !Object.keys(loadedLibraries).includes(memberAccessExpression.name)
         ) {
@@ -376,13 +371,13 @@ export default async (contractInfo: Contract) => {
         const calledFunction = node.memberName;
         const libraryAddress = loadedLibraries[memberAccessExpression.name];
         const argsToUse = parent.arguments.map((arg) => {
-          if (arg.type === 'NumberLiteral') {
+          if (arg.type === "NumberLiteral") {
             return arg.number;
           }
-          if (arg.type === 'StringLiteral') {
+          if (arg.type === "StringLiteral") {
             return arg.value;
           }
-          if (arg.type === 'Identifier') {
+          if (arg.type === "Identifier") {
             const matchingVal =
               findMatchingId(discoveredStateVars, arg.name, arg.range) ||
               findMatchingId(discoveredVariables, arg.name, arg.range) ||
@@ -407,12 +402,12 @@ export default async (contractInfo: Contract) => {
           ...getFlatLocationInfo(node),
           contractPath,
           contractName,
-          address: '',
-          source: 'public_function',
+          address: "",
+          source: "public_function",
           getAddress: async () => {
             const abi = await getAbiIfReturnsAddress(
               libraryAddress,
-              chain as SupportedChain,
+              chain,
               calledFunction
             );
             if (!abi) {
@@ -420,7 +415,7 @@ export default async (contractInfo: Contract) => {
                 `Could not find ABI for ${libraryAddress} on ${chain}`
               );
             }
-            const provider = getProvider(chain as SupportedChain);
+            const provider = getProvider(chain);
             const contract = new EthersContract(libraryAddress, abi, provider);
             const formattedArgs = (argsToUse as string[]).map((arg) => {
               if (isAddress(arg)) {
@@ -433,12 +428,12 @@ export default async (contractInfo: Contract) => {
         });
       }
       // if something like `interface(0x123).functionName(0x1234)`
-      if (memberAccessExpression.type !== 'FunctionCall') {
+      if (memberAccessExpression.type !== "FunctionCall") {
         return;
       }
       const memberAccessFunctionCallExpression =
         memberAccessExpression.expression;
-      if (memberAccessFunctionCallExpression.type !== 'Identifier') {
+      if (memberAccessFunctionCallExpression.type !== "Identifier") {
         return;
       }
       const memberAccessFunctionCallArguments =
@@ -449,12 +444,12 @@ export default async (contractInfo: Contract) => {
       const memberAccessFunctionCallArgument =
         memberAccessFunctionCallArguments[0];
       if (
-        memberAccessFunctionCallArgument.type !== 'NumberLiteral' &&
-        memberAccessFunctionCallArgument.type !== 'Identifier'
+        memberAccessFunctionCallArgument.type !== "NumberLiteral" &&
+        memberAccessFunctionCallArgument.type !== "Identifier"
       ) {
         return;
       }
-      if (memberAccessFunctionCallArgument.type === 'Identifier') {
+      if (memberAccessFunctionCallArgument.type === "Identifier") {
         const matchingName =
           findMatchingId(
             discoveredStateVars,
@@ -479,13 +474,13 @@ export default async (contractInfo: Contract) => {
         }
         const functionToCall = node.memberName;
         const argsToUse = parent.arguments.map((arg) => {
-          if (arg.type === 'NumberLiteral') {
+          if (arg.type === "NumberLiteral") {
             return arg.number;
           }
-          if (arg.type === 'StringLiteral') {
+          if (arg.type === "StringLiteral") {
             return arg.value;
           }
-          if (arg.type === 'Identifier') {
+          if (arg.type === "Identifier") {
             const matchingVal =
               findMatchingId(discoveredStateVars, arg.name, arg.range) ||
               findMatchingId(discoveredVariables, arg.name, arg.range) ||
@@ -510,12 +505,12 @@ export default async (contractInfo: Contract) => {
           ...getFlatLocationInfo(node),
           contractPath,
           contractName,
-          address: '',
-          source: 'public_function',
+          address: "",
+          source: "public_function",
           getAddress: async () => {
             const abi = await getAbiIfReturnsAddress(
               addressToCall,
-              chain as SupportedChain,
+              chain,
               functionToCall
             );
             if (!abi) {
@@ -523,7 +518,7 @@ export default async (contractInfo: Contract) => {
                 `Could not find ABI for ${addressToCall} on ${chain}`
               );
             }
-            const provider = getProvider(chain as SupportedChain);
+            const provider = getProvider(chain);
             const contract = new EthersContract(addressToCall, abi, provider);
             const formattedArgs = (argsToUse as string[]).map((arg) => {
               if (isAddress(arg)) {
@@ -534,17 +529,17 @@ export default async (contractInfo: Contract) => {
             return await contract[functionToCall](...formattedArgs);
           },
         });
-      } else if (memberAccessFunctionCallArgument.type === 'NumberLiteral') {
+      } else if (memberAccessFunctionCallArgument.type === "NumberLiteral") {
         const addressToCall = memberAccessFunctionCallArgument.number;
         const functionToCall = node.memberName;
         const argsToUse = parent.arguments.map((arg) => {
-          if (arg.type === 'NumberLiteral') {
+          if (arg.type === "NumberLiteral") {
             return arg.number;
           }
-          if (arg.type === 'StringLiteral') {
+          if (arg.type === "StringLiteral") {
             return arg.value;
           }
-          if (arg.type === 'Identifier') {
+          if (arg.type === "Identifier") {
             const val =
               discoveredStateVars[arg.name] ||
               discoveredVariables[arg.name] ||
@@ -562,12 +557,12 @@ export default async (contractInfo: Contract) => {
           ...getFlatLocationInfo(node),
           contractPath,
           contractName,
-          address: '',
-          source: 'public_function',
+          address: "",
+          source: "public_function",
           getAddress: async () => {
             const abi = await getAbiIfReturnsAddress(
               addressToCall,
-              chain as SupportedChain,
+              chain,
               functionToCall
             );
             if (!abi) {
@@ -575,7 +570,7 @@ export default async (contractInfo: Contract) => {
                 `Could not find ABI for ${addressToCall} on ${chain}`
               );
             }
-            const provider = getProvider(chain as SupportedChain);
+            const provider = getProvider(chain);
             const contract = new EthersContract(addressToCall, abi, provider);
             const formattedArgs = (argsToUse as string[]).map((arg) => {
               if (isAddress(arg)) {

@@ -1,8 +1,8 @@
-import type { SupportedChain } from '@/types';
+import { Chain } from "@/lib/chains";
 
 export const chainConfigs: Readonly<
   Record<
-    SupportedChain,
+    Chain,
     {
       endpoint: string;
       name: string;
@@ -10,24 +10,22 @@ export const chainConfigs: Readonly<
     }
   >
 > = {
-  ethereum: {
+  [Chain.MAINNET]: {
     chainId: 1,
-    name: 'Ethereum',
-    endpoint: 'https://eth.blockscout.com/',
+    name: "Ethereum",
+    endpoint: "https://eth.blockscout.com/",
+  },
+  [Chain.BASE]: {
+    chainId: 1,
+    name: "Ethereum",
+    endpoint: "https://eth.blockscout.com/",
   },
 };
 
-export const getChainConfigs = (chain: SupportedChain) => {
+export const getChainConfigs = (chain: Chain) => {
   const config = chainConfigs[chain];
   if (!config) {
-    throw new Error('Invalid chain');
+    throw new Error("Invalid chain");
   }
   return config;
-};
-
-export const getChainNameById = (chainId: number) => {
-  const chain = Object.entries(chainConfigs).find(
-    ([_, chainConfigs]) => chainConfigs.chainId === chainId
-  );
-  return chain ? chain[0] : undefined;
 };

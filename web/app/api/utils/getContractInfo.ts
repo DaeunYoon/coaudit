@@ -1,11 +1,12 @@
-import { getChainConfigs } from '@/utils';
-import axios from 'axios';
-import type { Contract, SupportedChain } from '@/types';
-import getRedis from './getRedis';
+import { getChainConfigs } from "@/utils";
+import axios from "axios";
+import type { Contract } from "@/types";
+import getRedis from "./getRedis";
+import { Chain } from "@/lib/chains";
 
 export default async function getContractInfo(
   address: string,
-  chain: SupportedChain
+  chain: Chain
 ): Promise<Contract[]> {
   const redis = getRedis();
 
@@ -18,12 +19,11 @@ export default async function getContractInfo(
   }
 
   const { endpoint } = getChainConfigs(chain);
-
   const fetchingURL = `${endpoint}/api/v2/smart-contracts/${address}`;
 
   try {
     const { data: contract } = await axios.get(fetchingURL);
-    console.log(contract.name);
+
     const baseContract = {
       address,
       chain,

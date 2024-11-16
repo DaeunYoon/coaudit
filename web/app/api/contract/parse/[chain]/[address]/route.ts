@@ -1,10 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
-import getParsedContract from '@/app/api/utils/getParsedContract';
-import getContractInfo from '@/app/api/utils/getContractInfo';
-import { SupportedChain, ParsedInformation, Contract } from '@/types';
+import { NextRequest, NextResponse } from "next/server";
+import getParsedContract from "@/app/api/utils/getParsedContract";
+import getContractInfo from "@/app/api/utils/getContractInfo";
+import { ParsedInformation, Contract } from "@/types";
+import { Chain } from "@/lib/chains";
 
 interface Params {
-  chain: SupportedChain;
+  chain: Chain;
   address: string;
 }
 
@@ -12,7 +13,7 @@ export async function GET(_: NextRequest, context: { params: Params }) {
   const { address, chain } = context.params;
   const contracts: Contract[] | Error = await getContractInfo(
     address,
-    chain as SupportedChain
+    Number(chain) as Chain
   );
 
   if (contracts instanceof Error) {

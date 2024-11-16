@@ -1,4 +1,4 @@
-export type SupportedChain = 'ethereum';
+import { Chain } from "./lib/chains";
 
 export declare interface AddressInfo {
   contractPath: string;
@@ -12,13 +12,13 @@ export declare interface AddressInfo {
   rangeFrom?: number;
   getAddress?: (...args: any) => Promise<any>;
   source:
-    | 'variable'
-    | 'hardcoded'
-    | 'interface'
-    | 'public_function'
-    | 'external_function'
-    | 'private_function'
-    | 'state';
+    | "variable"
+    | "hardcoded"
+    | "interface"
+    | "public_function"
+    | "external_function"
+    | "private_function"
+    | "state";
 }
 
 export interface LocalFunctionDefinition {
@@ -55,7 +55,7 @@ export interface ParsedInformation {
 
 export interface Contract {
   address: string;
-  chain: string;
+  chain: Chain;
   contractName: string;
   contractPath: string;
   sourceCode: string;

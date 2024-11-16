@@ -1,10 +1,6 @@
-import { getDefaultProvider } from 'ethers';
-import type { SupportedChain } from '@/types';
+import { Chain } from "@/lib/chains";
+import { getDefaultProvider } from "ethers";
 
-const CHAIN_IDS: Record<SupportedChain, string> = {
-  ethereum: 'homestead',
-};
-
-export default (chain: SupportedChain) => {
-  return getDefaultProvider(CHAIN_IDS[chain]);
+export default (chain: Chain) => {
+  return getDefaultProvider(chain);
 };
