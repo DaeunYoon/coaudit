@@ -1,24 +1,27 @@
-'use client';
+"use client";
 
-import { useQuery } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
-import axios from 'axios';
-import { usePathname } from 'next/navigation';
-import { baseUrl } from '@/utils/constants';
-import formatFilePath from '@/components/organisms/monaco/utils/formatFilePath';
-import CodeEditor from '@/components/organisms/monaco/CodeEditor';
-import { ParsedInformation } from '@/types';
-import Card from '@/components/atoms/card';
-import { Chain, chains, getExplorerAddressUri } from '@/lib/chains';
-import Link from 'next/link';
-import Button from '@/components/atoms/button';
-import CreateBountyModal from '@/components/molecules/createBountyModal';
-import CreateBugModal from '@/components/molecules/createBugModal';
+import { useQuery } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import axios from "axios";
+import { usePathname } from "next/navigation";
+import { baseUrl } from "@/utils/constants";
+import formatFilePath from "@/components/organisms/monaco/utils/formatFilePath";
+import CodeEditor from "@/components/organisms/monaco/CodeEditor";
+import { ParsedInformation } from "@/types";
+import Card from "@/components/atoms/card";
+import { Chain, chains, getExplorerAddressUri } from "@/lib/chains";
+import Link from "next/link";
+import Button from "@/components/atoms/button";
+import CreateBountyModal from "@/components/molecules/createBountyModal";
+import CreateBugModal from "@/components/molecules/createBugModal";
+import { useMemo } from "react";
+import { BigNumber } from "ethers";
+import { formatEther, formatUnits } from "viem";
 
 export default function Explorer() {
   const pathname = usePathname();
-  const chain = pathname.split('/')[2];
-  const address = pathname.split('/')[3];
+  const chain = pathname.split("/")[2];
+  const address = pathname.split("/")[3];
 
   function getEditorData(contractInfo: any[] | undefined) {
     if (!contractInfo) {
@@ -35,7 +38,7 @@ export default function Explorer() {
   }
 
   const { data: editorData, isLoading: isLoadingContract } = useQuery({
-    queryKey: ['contract', chain, address],
+    queryKey: ["contract", chain, address],
     queryFn: async () => {
       try {
         const url = `${baseUrl}/api/contract/${chain}/${address}`;
@@ -44,7 +47,7 @@ export default function Explorer() {
 
         return editorData;
       } catch (e) {
-        toast.error('Something went wrong fetching contract information.');
+        toast.error("Something went wrong fetching contract information.");
         console.error(e);
         return null;
       }
@@ -84,12 +87,12 @@ export default function Explorer() {
   // });
 
   const { data: attestations } = useQuery({
-    queryKey: ['contract', 'status', chain, address],
+    queryKey: ["contract", "status", chain, address],
     queryFn: async () => {
       const loadingToastId = toast.loading(
-        'Fetching parsed data information...',
+        "Fetching parsed data information...",
         {
-          id: 'parsedData',
+          id: "parsedData",
         }
       );
 
@@ -97,12 +100,12 @@ export default function Explorer() {
         const url = `${baseUrl}/api/contract/index/${chain}/${address}`;
         const { data: attestations } = await axios.get(url, {});
 
-        toast.success('Successfully fethced parsed function data!', {
+        toast.success("Successfully fethced parsed function data!", {
           id: loadingToastId,
         });
-        return (attestations?.data || []) as Record<string, ParsedInformation>;
+        return attestations?.data || [];
       } catch (e) {
-        toast.error('Something went wrong fetching parsed data information.', {
+        toast.error("Something went wrong fetching parsed data information.", {
           id: loadingToastId,
         });
         console.error(e);
@@ -112,6 +115,26 @@ export default function Explorer() {
     staleTime: 1000 * 60 * 60,
     enabled: !!chain && !!address,
   });
+
+  const overviewData = useMemo(() => {
+    if (!attestations) return {};
+
+    const totalBountyAmount = attestations.reduce(
+      (acc: BigNumber, attestation: any) =>
+        BigNumber.from(acc).add(attestation.amount),
+      BigNumber.from(0)
+    );
+
+    return {
+      totalBountyAmount: formatUnits(totalBountyAmount, 18),
+      totalBugsReported: attestations.length - 1,
+      totalPayouts: 0,
+      // totalPayouts: attestations.reduce(
+      //   (acc, attestation) => acc + Number(attestation.amount),
+      //   0
+      // ),
+    };
+  }, [attestations]);
 
   const formatHash = (
     hash: string,
@@ -124,7 +147,7 @@ export default function Explorer() {
 
   return (
     <div className="w-[1200px] pt-32 pb-12 flex flex-col gap-8">
-      <Card className={'bg-sidebar-background flex items-center'}>
+      <Card className={"bg-sidebar-background flex items-center"}>
         <div className="flex flex-col gap-2  w-[25%]">
           <h2 className="text-sm text-white">Chain</h2>
           <p className="text-white text-lg">
@@ -136,7 +159,7 @@ export default function Explorer() {
           <h2 className="text-sm text-white">Address</h2>
           <p className="text-white">
             <Link
-              target={'_blank'}
+              target={"_blank"}
               href={getExplorerAddressUri(Number(chain), address)}
               className="text-blue-300 text-xl"
             >
@@ -147,53 +170,70 @@ export default function Explorer() {
 
         <div className="flex flex-col gap-2 w-[25%]">
           <h2 className="text-sm text-white">Total bounty Amount</h2>
-          <p className="text-white text-xl">0 ETH</p>
+          <p className="text-white text-xl">
+            {overviewData.totalBountyAmount || 0} ETH
+          </p>
         </div>
 
         <div className="flex flex-col gap-2 w-[25%]">
           <h2 className="text-sm text-white">Total bugs reported</h2>
-          <p className="text-white text-xl">0</p>
+          <p className="text-white text-xl">
+            {overviewData.totalBugsReported || 0}
+          </p>
         </div>
 
         <div className="flex flex-col gap-2 w-[25%]">
           <h2 className="text-sm text-white">Total payouts</h2>
-          <p className="text-white text-xl">0 ETH</p>
+          <p className="text-white text-xl">
+            {overviewData.totalPayouts || 0} ETH
+          </p>
         </div>
       </Card>
 
       <div className="flex gap-6">
-        <Card className={'bg-sidebar-background flex gap-6'}>
+        <Card className={"bg-sidebar-background flex gap-6"}>
           <div className="flex flex-col gap-2">
             <h2 className="text-xl text-white mb-2">Bounties</h2>
-            <p className="text-white">No bounties created</p>
-            <Button
-              className="py-0"
-              onClick={() => {
-                const modal: any = document.getElementById(
-                  'create-bounty-modal'
-                );
-                modal?.showModal() as any;
-              }}
-            >
-              Add a bounty
-            </Button>
+
+            {attestations?.length > 0 ? (
+              <p className="text-white">
+                {attestations[0].schema.description || ""}
+              </p>
+            ) : (
+              <>
+                <p className="text-white">No bounties created</p>
+                <Button
+                  className="py-0"
+                  onClick={() => {
+                    const modal: any = document.getElementById(
+                      "create-bounty-modal"
+                    );
+                    modal?.showModal() as any;
+                  }}
+                >
+                  Add a bounty
+                </Button>
+              </>
+            )}
           </div>
         </Card>
 
-        <Card className={'bg-sidebar-background flex gap-6'}>
+        <Card className={"bg-sidebar-background flex gap-6"}>
           <div className="flex flex-col gap-2">
             <h2 className="text-xl text-white mb-2">Bug reports</h2>
             <div className="text-white flex justify-center flex-col gap-3 w-full">
               <p className="text-white">No bugs submitted</p>
-              <Button
-                onClick={() => {
-                  const modal: any =
-                    document.getElementById('create-bug-modal');
-                  modal?.showModal() as any;
-                }}
-              >
-                Report a bug
-              </Button>
+              {attestations?.length < 2 && (
+                <Button
+                  onClick={() => {
+                    const modal: any =
+                      document.getElementById("create-bug-modal");
+                    modal?.showModal() as any;
+                  }}
+                >
+                  Report a bug
+                </Button>
+              )}
             </div>
           </div>
         </Card>

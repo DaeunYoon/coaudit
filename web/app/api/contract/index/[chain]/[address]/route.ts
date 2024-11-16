@@ -43,22 +43,22 @@ export async function GET(_: NextRequest, context: { params: Params }) {
 
   const data = [];
 
-  for (const item of res.rows) {
+  for (const row of res.rows) {
     const amount = await publicClient.readContract({
       address: "0x69e4EEbc6176d8905B2BDd416e4E69Dc830c3d36" as `0x${string}`,
       abi: bountyHookAbi as Abi,
       functionName: "bountyIdToBalance",
       args: [row?.attestationId],
     });
+
     // const decoded = decodeOnChainData(res?.rows[0].data, 0, dataType);
 
     data.push({
-      ...item,
+      ...row,
       amount,
     });
   }
 
-  console.log(data);
   return NextResponse.json({
     data: data,
     status: 200,
