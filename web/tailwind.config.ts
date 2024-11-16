@@ -24,8 +24,8 @@ const config: Config = {
         "background-primary": "#0f0f10",
         "background-secondary": "#131315",
         "background-tertiary": "#131315",
-        "primary-accent": "#2491fc",
-        "primary-accent-hover": "#0281fe",
+        "primary-accent": "#6e56cf",
+        "primary-accent-hover": "#836add",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
@@ -67,6 +67,23 @@ const config: Config = {
           "5": "hsl(var(--chart-5))",
         },
       },
+      daisyui: {
+        themes: [
+          {
+            mytheme: {
+              primary: "#ff00ff",
+              secondary: "#ff00ff",
+              accent: "#00ffff",
+              neutral: "#ff00ff",
+              "base-100": "#ff00ff",
+              info: "#0000ff",
+              success: "#00ff00",
+              warning: "#00ff00",
+              error: "#ff0000",
+            },
+          },
+        ],
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -74,6 +91,6 @@ const config: Config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate"), require("daisyui")],
 };
 export default config;

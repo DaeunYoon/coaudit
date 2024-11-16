@@ -5,6 +5,8 @@ import { ContextProvider } from ".";
 import ReactQueryProvider from "./ReactQueryProvider";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import { Toaster } from "react-hot-toast";
+
 const inter = Inter({ subsets: ["latin"] });
 
 // Websit Config
@@ -22,6 +24,12 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <ReactQueryProvider>
+          <Toaster
+            position="top-center"
+            toastOptions={{
+              style: { maxWidth: 425 },
+            }}
+          />
           <ContextProvider>
             <Header />
             <div className="w-full min-h-screen bg-background-primary flex justify-center items-center p-2">
