@@ -31,9 +31,7 @@ export default function CreateBountyModal({
 
       try {
         const formattedAmount = parseUnits(bountyAmount, 18);
-        console.log(config);
         const walletClient = await getWalletClient(config);
-        console.log(walletClient);
         const [account] = await walletClient.getAddresses();
         const client = getPublicClient(config);
         if (!client) throw new Error("Error retrieving public client");

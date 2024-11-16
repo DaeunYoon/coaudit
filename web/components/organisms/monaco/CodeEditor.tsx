@@ -14,6 +14,7 @@ import CodeEditorTabs from "./CodeEditorTabs";
 import CodeEditorBreadcrumbs from "./CodeEditorBreadcrumbs";
 import CodeEditorSideBar from "./CodeEditorSideBar";
 import { ParsedInformation } from "@/types";
+import addFunctionDecorations from "./utils/addFunctionDecorations";
 
 export interface SmartContractExternalLibrary {
   address_hash: string;
@@ -65,6 +66,7 @@ const CodeEditor = ({
 
     const { monaco, editor } = monacoRef.current;
 
+    // addFunctionDecorations(editor.getModel()!);
     //Get all function definitions
     // const regularImportMatches = model.findMatches(
     //   "^import ('|\")(.+)('|\")",
@@ -128,6 +130,26 @@ const CodeEditor = ({
         });
       }
       console.log("before registerLinkProvider");
+      addFunctionDecorations(editor.getModel()!);
+
+      monaco.languages.registerDefinitionProvider(language, {
+        provideDefinition(model, position, toen) {
+          console.log(model);
+          console.log(position);
+          return [
+            {
+              uri: monaco.Uri.file("contracts/NoDelegateCall.sol"),
+              range: {
+                startLineNumber: 1,
+                endLineNumber: 1,
+                startColumn: 7,
+                endColumn: 7,
+              },
+            },
+          ];
+        },
+      });
+
       monaco.languages.registerLinkProvider(language, {
         provideLinks: (model: monaco.editor.ITextModel) => {
           console.log("search for pragma");
@@ -262,7 +284,7 @@ const CodeEditor = ({
   }
 
   return (
-    <div className="relative pr-[250px]">
+    <div className="relative pr-[250px] bg-background-secondary">
       <div className="flex flex-col">
         <CodeEditorTabs
           tabs={tabs}
