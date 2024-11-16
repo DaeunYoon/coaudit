@@ -61,13 +61,15 @@ export interface Contract {
   sourceCode: string;
   abi: string;
   compilerVersion: string;
-  optimizationUsed: number;
-  runs: number;
+  optimizationEnabled: boolean;
+  runs?: number;
   constructorArguments: string;
   evmVersion: string;
-  library: string;
+  libraries: {
+    name: string;
+    addressHash: string;
+  }[];
   licenseType: string;
-  proxy: boolean;
+  proxy: string;
   implementation: string;
-  swarmSource: string;
 }

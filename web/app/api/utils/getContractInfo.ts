@@ -17,57 +17,47 @@ export default async function getContractInfo(
     return cachedContracts;
   }
 
-  const { endpoint, apiKey } = getChainConfigs(chain);
-  if (!apiKey) {
-    throw new Error('No API key');
-  }
+  const { endpoint } = getChainConfigs(chain);
 
-  const fetchingURL = `${endpoint}/api?module=contract&action=getsourcecode&address=${address}&apikey=${apiKey}`;
+  const fetchingURL = `${endpoint}/api/v2/smart-contracts/${address}`;
 
   try {
-    const { data } = await axios.get(fetchingURL);
-
-    const source = data.result[0].SourceCode;
-    const slicedSource = source.substring(1, source.length - 1);
-
+    const { data: contract } = await axios.get(fetchingURL);
+    console.log(contract.name);
     const baseContract = {
-      address: address,
-      chain: chain,
-      contractName: data.result[0].ContractName,
-      abi: data.result[0].ABI,
-      compilerVersion: data.result[0].CompilerVersion,
-      optimizationUsed: Number(data.result[0].OptimizationUsed),
-      runs: Number(data.result[0].Runs),
-      constructorArguments: data.result[0].ConstructorArguments,
-      evmVersion: data.result[0].EVMVersion,
-      library: data.result[0].Library,
-      licenseType: data.result[0].LicenseType,
-      proxy: data.result[0].Proxy,
-      implementation: data.result[0].Implementation,
-      swarmSource: data.result[0].SwarmSource,
+      address,
+      chain,
+      contractName: contract.name,
+      abi: contract.abi,
+      compilerVersion: contract.compiler_version,
+      optimizationEnabled: contract.optimization_enabled,
+      runs: contract.compiler_settings.optimizer
+        ? Number(contract.compiler_settings.optimizer.runs)
+        : undefined,
+      constructorArguments: contract.constructor_args,
+      evmVersion: contract.evm_version,
+      libraries: contract.external_libraries,
+      licenseType: contract.license_type,
+      proxy: contract.proxy_type,
+      implementation: contract.implementations?.[0]?.address,
     };
 
     const contracts: Contract[] = [];
 
-    try {
-      // When there are more than one contract
-      const parsedSource = JSON.parse(slicedSource);
-      const contractPaths = Object.keys(parsedSource.sources);
-      for (const contractPath of contractPaths) {
-        const eachSource = parsedSource.sources[contractPath].content;
+    // Add compiled contract
+    contracts.push({
+      ...baseContract,
+      sourceCode: contract.source_code,
+      contractPath: contract.file_path,
+    });
 
-        contracts.push({
-          ...baseContract,
-          contractPath,
-          sourceCode: eachSource,
-        });
-      }
-    } catch (error) {
-      // When there are only one contract
+    // Add additional sources
+    const additionalSources = contract.additional_sources;
+    for (const source of additionalSources) {
       contracts.push({
         ...baseContract,
-        sourceCode: data.result[0].SourceCode,
-        contractPath: `/${data.result[0].ContractName}.sol`,
+        contractPath: source.file_path,
+        sourceCode: source.source_code,
       });
     }
 

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { ParsedInformation } from '@/types';
 
 export default function Test() {
-  const address = '0xBE1cE564574377Acb17C2b7628E4F6dd38067a55';
+  const address = '0x000000000022D473030F116dDEE9F6B43aC78BA3';
   const chain = 'ethereum';
   const [parsedInfos, setParsedInfo] = useState<
     ParsedInformation | undefined

@@ -8,14 +8,9 @@ export default async function loadContractLibraries(
   try {
     const contract = await getContractInfo(address, chain);
 
-    if (contract[0].library === '') return {};
-    const libraries = contract[0].library.split(';');
-    const ret = Object.fromEntries(
-      libraries.map((l) => {
-        const [key, val] = l.split(':');
-        return [key, `0x${val}`];
-      })
-    );
+    if (contract[0].libraries.length === 0) return {};
+    const libraries = contract[0].libraries.map((l) => [l.name, l.addressHash]);
+    const ret = Object.fromEntries(libraries);
     await Promise.all(
       Object.values(ret).map(async (v) => {
         return loadContractLibraries(v, chain);

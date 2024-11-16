@@ -5,7 +5,6 @@ export const chainConfigs: Readonly<
     SupportedChain,
     {
       endpoint: string;
-      apiKey: string | undefined;
       name: string;
       chainId: number;
     }
@@ -14,8 +13,7 @@ export const chainConfigs: Readonly<
   ethereum: {
     chainId: 1,
     name: 'Ethereum',
-    endpoint: 'https://api.etherscan.io',
-    apiKey: process.env.ETHERSCAN_API_KEY,
+    endpoint: 'https://eth.blockscout.com/',
   },
 };
 
