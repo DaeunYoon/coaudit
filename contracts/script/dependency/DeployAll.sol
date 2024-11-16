@@ -46,6 +46,7 @@ library DeployAll {
         instance.bountySchemaId = sp.register(bountySchema, new bytes(0));
 
         ReportHook reportHook = new ReportHook(address(instance.auditManager), params.sp);
+        // linkedAttestationId is the attestationId of the bounty
         Schema memory reportSchema = Schema({
             registrant: params.deployer,
             revocable: true,
@@ -59,6 +60,7 @@ library DeployAll {
         instance.reportSchemaId = sp.register(reportSchema, new bytes(0));
 
         ReportStatusHook reportStatusHook = new ReportStatusHook(address(instance.auditManager), params.sp);
+        // linkedAttestationId is the attestationId of the report
         Schema memory reportStatusSchema = Schema({
             registrant: params.deployer,
             revocable: true,

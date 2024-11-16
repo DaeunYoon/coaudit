@@ -1,8 +1,8 @@
 {
   "11155111": {
-    "auditManager": "0x5e684bdf05f613b65b7c0f0ab05b5fd8d3642332",
-    "bountySchema": "773",
-    "reportSchema": "774",
-    "reportStatusSchema": "775"
+    "auditManager": "0xe11F0559D147408F1B9b2fEd92C7e3126610A322.",
+    "bountySchema": "785",
+    "reportSchema": "786",
+    "reportStatusSchema": "787"
   }
 }
