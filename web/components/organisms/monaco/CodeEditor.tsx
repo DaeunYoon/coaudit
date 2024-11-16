@@ -1,7 +1,7 @@
 import type { EditorProps } from '@monaco-editor/react';
 import MonacoEditor from '@monaco-editor/react';
 import type * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 
 import type { File, Monaco } from './types';
 
@@ -14,8 +14,6 @@ import CodeEditorTabs from './CodeEditorTabs';
 import CodeEditorBreadcrumbs from './CodeEditorBreadcrumbs';
 import CodeEditorSideBar from './CodeEditorSideBar';
 import { ParsedInformation } from '@/types';
-import addFunctionDecorations from './utils/addFunctionDecorations';
-import Link from 'next/link';
 import { Chain } from '@/lib/chains';
 
 export interface SmartContractExternalLibrary {
@@ -63,43 +61,56 @@ const CodeEditor = ({
     monaco.editor.IStandaloneCodeEditor | undefined
   >();
   const [index, setIndex] = React.useState(0);
-  const [tabs, setTabs] = React.useState([data[index].file_path]);
-
-  useEffect(() => {
-    if (!parsedData || !monacoRef.current) return;
-
-    const { monaco, editor } = monacoRef.current;
-
-    const addressDecorations = Object.entries(parsedData).map(
-      ([contractPath, parsedData]) => {
-        return parsedData.addresses.map((address) => {
-          return {
-            range: new monaco.Range(
-              address.locStartLine,
-              address.locStartCol,
-              address.locEndLine,
-              address.locEndCol
-            ),
-            options: {
-              isWholeLine: false,
-              inlineClassName: `address-info ${address.source}`,
-              hoverMessage: [
-                {
-                  value: `Address: ${address.address}`,
-                },
-              ],
-            },
-          };
-        });
-      }
-    );
-
-    // For each function call, find the corresponding definition
-  }, [parsedData]);
+  const [tabs, setTabs] = React.useState([data[index]?.file_path]);
 
   React.useEffect(() => {
     instance?.editor.setTheme('blockscout-dark');
   }, [instance?.editor]);
+
+  useEffect(() => {
+    const currentContract = (
+      data[index].file_path.split('/').pop() ?? data[index].file_path
+    ).split('.')[0];
+
+    const currentAddresses = parsedData?.[currentContract]?.addresses ?? [];
+
+    if (instance) {
+      instance.languages.registerLinkProvider(language, {
+        provideLinks: () => {
+          const links = currentAddresses.map(
+            ({
+              address,
+              locStartLine,
+              locStartCol,
+              locEndLine,
+              locEndCol,
+            }) => ({
+              range: {
+                startLineNumber: locStartLine,
+                startColumn: locStartCol,
+                endLineNumber: locEndLine,
+                endColumn: locEndCol,
+              },
+              url: `/explore/${chain}/${address}`,
+              tooltip: address,
+            })
+          );
+
+          return { links };
+        },
+        resolveLink: (link) => {
+          if (editor) {
+            editor.setPosition({
+              lineNumber: link.range.startLineNumber,
+              column: link.range.startColumn,
+            });
+            editor.revealLineInCenter(link.range.startLineNumber);
+          }
+          return link;
+        },
+      });
+    }
+  }, [index, parsedData]); // Dependency array includes taskid to refetch if it changes
 
   const handleEditorDidMount = React.useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor, monaco: Monaco) => {
@@ -136,67 +147,6 @@ const CodeEditor = ({
             addExternalLibraryWarningDecoration(model, libraries);
         });
       }
-      addFunctionDecorations(editor.getModel()!);
-
-      monaco.languages.registerDefinitionProvider(language, {
-        provideDefinition(model, position, toen) {
-          console.log(model);
-          console.log(position);
-          return [
-            {
-              uri: monaco.Uri.file('contracts/NoDelegateCall.sol'),
-              range: {
-                startLineNumber: 1,
-                endLineNumber: 1,
-                startColumn: 7,
-                endColumn: 7,
-              },
-            },
-          ];
-        },
-      });
-
-      monaco.languages.registerLinkProvider(language, {
-        provideLinks: (model: monaco.editor.ITextModel) => {
-          console.log('search for pragma');
-          const searchQuery = 'pragma'; // Regex to find function definitions
-          const matches = model.findMatches(
-            searchQuery,
-            false,
-            false,
-            false,
-            null,
-            false
-          );
-
-          const links = matches.map((match) => {
-            console.log(match);
-            const startPosition = model.getPositionAt(
-              match.range.getStartPosition().lineNumber
-            );
-            const endPosition = model.getPositionAt(
-              match.range.getEndPosition().lineNumber
-            );
-
-            return {
-              range: new monaco.Range(
-                startPosition.lineNumber,
-                startPosition.column,
-                endPosition.lineNumber,
-                endPosition.column
-              ),
-              url: `http://localhost:3000/explore/1/0x1F98431c8aD98523631AE4a59f267346ea31F984`, // Custom URL format for navigation
-            };
-          });
-
-          return { links }; // Return an object with links property
-        },
-        resolveLink: (link: any) => {
-          console.log('resolveLink', link);
-
-          return null;
-        },
-      });
 
       editor.addAction({
         id: 'close-tab',
@@ -254,7 +204,7 @@ const CodeEditor = ({
           const isActive =
             _isActive !== undefined
               ? _isActive
-              : data[index].file_path === path;
+              : data[index]?.file_path === path;
 
           if (isActive) {
             const nextActiveIndex = data.findIndex(
@@ -273,6 +223,13 @@ const CodeEditor = ({
     [data, index]
   );
 
+  if (data.length < 1) {
+    return (
+      <div className="flex justify-center items-center h-[600px] w-full">
+        <p className="text-white">No source code found</p>
+      </div>
+    );
+  }
   if (data.length === 1) {
     return (
       <div className="h-[600px] w-full">

@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
-import getParsedContract from "@/app/api/utils/getParsedContract";
-import getContractInfo from "@/app/api/utils/getContractInfo";
-import { ParsedInformation, Contract } from "@/types";
-import { Chain } from "@/lib/chains";
+import { NextRequest, NextResponse } from 'next/server';
+import getParsedContract from '@/app/api/utils/getParsedContract';
+import getContractInfo from '@/app/api/utils/getContractInfo';
+import { ParsedInformation, Contract } from '@/types';
+import { Chain } from '@/lib/chains';
 
 interface Params {
   chain: Chain;
@@ -26,7 +26,7 @@ export async function GET(_: NextRequest, context: { params: Params }) {
   const ret: Record<string, ParsedInformation> = {};
   for (const contractInfo of contracts) {
     const parsedInfo = await getParsedContract(contractInfo);
-    ret[contractInfo.contractPath] = parsedInfo;
+    ret[contractInfo.contractName] = parsedInfo;
   }
 
   return NextResponse.json({

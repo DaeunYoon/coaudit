@@ -1,41 +1,22 @@
-import type * as monaco from "monaco-editor/esm/vs/editor/editor.api";
+import type * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import type { AddressInfo } from '@/types';
 
-export default function addFunctionDecorations(
-  model: monaco.editor.ITextModel
-) {
+export default function addFunctionDecorations(addresses: AddressInfo[]) {
   const options: monaco.editor.IModelDecorationOptions = {
-    inlineClassName: "function-link",
-    hoverMessage: {
-      value: "Cmd/Win + click to open file",
-    },
+    inlineClassName: 'highlight',
   };
 
-  const namedImportMatches = model.findMatches(
-    "pragma",
-    false,
-    false,
-    false,
-    null,
-    true
-  );
-
   //Add mapping of all local functions into 1 map
-
-  console.log("namedImportMatches", namedImportMatches);
   const namedImportDecorations: Array<monaco.editor.IModelDeltaDecoration> =
-    namedImportMatches.map(({ range, matches }) => ({
+    addresses.map(({ locStartLine, locStartCol, locEndLine, locEndCol }) => ({
       range: {
-        startColumn: 8,
-        endColumn: 29,
-        endLineNumber: 24,
-        startLineNumber: 24,
-        range: {
-          startColumn: 1036,
-          endColumn: 1057,
-        },
+        startColumn: locStartCol,
+        endColumn: locEndCol,
+        endLineNumber: locEndLine,
+        startLineNumber: locStartLine,
       },
       options,
     }));
-  console.log("namedImportDecorations", namedImportDecorations);
-  model.deltaDecorations([], namedImportDecorations);
+
+  return namedImportDecorations;
 }
