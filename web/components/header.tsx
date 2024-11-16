@@ -24,12 +24,12 @@ const Header = () => {
             <Link href="/explore">
               <div className="text-white font-bold">Explore</div>
             </Link>
-            <Link href="/defi">
+            {/* <Link href="/defi">
               <div className="text-white font-bold">DeFi</div>
             </Link>
             <Link href="/sign">
               <div className="text-white font-bold">Sign</div>
-            </Link>
+            </Link> */}
             <Button onClick={handleLogOut}>Log Out</Button>
           </div>
         </div>

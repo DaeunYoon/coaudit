@@ -1,29 +1,48 @@
+import { createConfig } from "wagmi";
+import { Chain as ViemChain, http } from "viem";
+import { base, mainnet, sepolia } from "viem/chains";
+
 export enum Chain {
   MAINNET = 1,
   BASE = 8453,
 }
 
-export const chains: Record<Chain, any> = {
+export const chains: readonly [ViemChain, ...ViemChain[]] = [base, mainnet];
+
+export const ChainSettings: Record<
+  Chain,
+  {
+    name: string;
+    color: string;
+  }
+> = {
   [Chain.MAINNET]: {
-    chainId: "0x1",
-    chainName: "Ethereum",
-    nativeCurrency: {
-      name: "Ethereum",
-      symbol: "ETH",
-      decimals: 18,
-    },
-    rpcUrls: ["https://mainnet.infura.io/v3/"],
-    blockExplorerUrls: ["https://etherscan.io"],
+    name: "ETH Mainnet",
+    color: "#fff",
   },
   [Chain.BASE]: {
-    chainId: "0x2102",
-    chainName: "Base",
-    nativeCurrency: {
-      name: "Base",
-      symbol: "BASE",
-      decimals: 18,
-    },
-    rpcUrls: ["https://rpc.basechain.net"],
-    blockExplorerUrls: ["https://explorer.basechain.net"],
+    name: "Base",
+    color: "#3372fa",
   },
+};
+
+export const config = createConfig({
+  chains,
+  transports: {
+    [mainnet.id]: http(),
+    [sepolia.id]: http(),
+    [base.id]: http(),
+  },
+});
+
+export const getExplorerTransactionUri = (chainId: number, address: string) => {
+  return `${
+    chains.find(({ id }) => id === chainId)?.blockExplorers?.default.url
+  }/tx/${address}`;
+};
+
+export const getExplorerAddressUri = (chainId: number, address: string) => {
+  return `${
+    chains.find(({ id }) => id === chainId)?.blockExplorers?.default.url
+  }/address/${address}`;
 };
