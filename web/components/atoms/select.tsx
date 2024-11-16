@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Chain } from "@/lib/chains";
+import { Chain } from '@/lib/chains';
 
 export interface SelectOption {
   label: string;
@@ -24,11 +24,8 @@ export default function Select({
 }) {
   return (
     <label className="form-control w-full max-w-xs">
-      {/* <div className="label">
-        <span className="label-text text-white">{title}</span>
-      </div> */}
       <select
-        className="select select-bordered text-white bg-transparent"
+        className="select select-bordered text-white bg-slate-700"
         onChange={(e) => onClick(e.target.value)}
         disabled={loading}
       >
