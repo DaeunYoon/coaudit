@@ -4,20 +4,11 @@ import { Chain, config } from '@/lib/chains';
 import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { Abi, isAddress, parseUnits } from 'viem';
-import { waitForTransactionReceipt } from 'viem/actions';
 import { Input } from '../atoms/input';
 import { useState } from 'react';
 import Button from '../atoms/button';
-import { getPublicClient, getWalletClient } from '@wagmi/core';
 
-import {
-  SignProtocolClient,
-  SpMode,
-  EvmChains,
-  IndexService,
-  decodeOnChainData,
-  DataLocationOnChain,
-} from '@ethsign/sp-sdk';
+import { SignProtocolClient, SpMode, EvmChains } from '@ethsign/sp-sdk';
 import { schemaConfig } from '@/config';
 
 export default function CreateBountyModal({
