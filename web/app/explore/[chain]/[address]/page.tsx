@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 import { baseUrl } from '@/utils/constants';
 import formatFilePath from '@/components/organisms/monaco/utils/formatFilePath';
 import CodeEditor from '@/components/organisms/monaco/CodeEditor';
+import { ParsedInformation } from '@/types';
 import Card from '@/components/atoms/card';
 import { Chain, chains, getExplorerAddressUri } from '@/lib/chains';
 import Link from 'next/link';
@@ -122,8 +123,8 @@ export default function Explorer() {
 
     return {
       totalBountyAmount: formatUnits(totalBountyAmount, 18),
-      totalBugsReported: attestations.reports.length - 1,
-      totalPayouts: attestations.reports.reduce((acc, report) => {
+      totalBugsReported: attestations.reports.length,
+      totalPayouts: attestations.reports.reduce((acc: any, report: any) => {
         if (report.status && report.status.amount > 0) {
           return acc + 1;
         }
@@ -265,7 +266,11 @@ export default function Explorer() {
       )}
 
       <CreateBountyModal contractAddress={address} chainId={chain} />
-      <CreateBugModal contractAddress={address} chainId={chain} />
+      <CreateBugModal
+        contractAddress={address}
+        chainId={chain}
+        bountyId={attestations?.bounty[0]?.attestationId}
+      />
     </div>
   );
 }

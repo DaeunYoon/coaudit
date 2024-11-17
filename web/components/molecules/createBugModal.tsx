@@ -1,5 +1,4 @@
 'use client';
-
 import { Chain, config } from '@/lib/chains';
 import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
@@ -39,7 +38,8 @@ export default function CreateBugModal({
 
         const res = await client.createAttestation({
           schemaId: schemaInfo.reportSchema,
-          linkedAttestationId: '0x420',
+          // linkedAttestationId: '0x420',
+          linkedAttestationId: bountyId,
           data: {
             finding: bugText,
           },
