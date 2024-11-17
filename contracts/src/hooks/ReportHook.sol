@@ -47,7 +47,7 @@ contract ReportHook is ISPHook {
         IERC20, // resolverFeeERC20Token
         uint256, // resolverFeeERC20Amount
         bytes calldata // extraData
-    ) external view auth ownerSchemaOnly(schemaId) {
+    ) external view ownerSchemaOnly(schemaId) {
         _didReceiveAttestation(attestationId);
     }
 
@@ -56,7 +56,7 @@ contract ReportHook is ISPHook {
         uint64 schemaId,
         uint64 attestationId,
         bytes calldata // extraData
-    ) external payable auth ownerSchemaOnly(schemaId) {
+    ) external payable ownerSchemaOnly(schemaId) {
         _didReceiveAttestation(attestationId);
     }
 

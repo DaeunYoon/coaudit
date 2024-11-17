@@ -62,7 +62,7 @@ contract ReportStatusHook is ISPHook {
         IERC20, // resolverFeeERC20Token
         uint256, // resolverFeeERC20Amount
         bytes calldata // extraData
-    ) external auth ownerSchemaOnly(schemaId) {
+    ) external ownerSchemaOnly(schemaId) {
         _didReceiveAttestation(attestationId);
     }
 
@@ -71,7 +71,7 @@ contract ReportStatusHook is ISPHook {
         uint64 schemaId,
         uint64 attestationId,
         bytes calldata // extraData
-    ) external payable auth ownerSchemaOnly(schemaId) {
+    ) external payable ownerSchemaOnly(schemaId) {
         _didReceiveAttestation(attestationId);
     }
 
@@ -91,7 +91,7 @@ contract ReportStatusHook is ISPHook {
         uint64 schemaId,
         uint64 attestationId,
         bytes calldata // extraData
-    ) external payable auth ownerSchemaOnly(schemaId) {
+    ) external payable ownerSchemaOnly(schemaId) {
         _didReceiveRevocation(attestationId);
     }
 
@@ -102,7 +102,7 @@ contract ReportStatusHook is ISPHook {
         IERC20, // resolverFeeERC20Token
         uint256, // resolverFeeERC20Amount
         bytes calldata // extraData
-    ) external auth ownerSchemaOnly(schemaId) {
+    ) external ownerSchemaOnly(schemaId) {
         _didReceiveRevocation(attestationId);
     }
 

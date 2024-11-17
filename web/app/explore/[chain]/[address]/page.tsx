@@ -7,7 +7,6 @@ import { usePathname } from 'next/navigation';
 import { baseUrl } from '@/utils/constants';
 import formatFilePath from '@/components/organisms/monaco/utils/formatFilePath';
 import CodeEditor from '@/components/organisms/monaco/CodeEditor';
-import { ParsedInformation } from '@/types';
 import Card from '@/components/atoms/card';
 import { Chain, chains, getExplorerAddressUri } from '@/lib/chains';
 import Link from 'next/link';
@@ -130,10 +129,6 @@ export default function Explorer() {
         }
         return acc;
       }, 0),
-      // totalPayouts: attestations.reduce(
-      //   (acc, attestation) => acc + Number(attestation.amount),
-      //   0
-      // ),
     };
   }, [attestations]);
 
@@ -196,9 +191,9 @@ export default function Explorer() {
           <div className="flex flex-col gap-2">
             <h2 className="text-xl text-white mb-2">Bounties</h2>
 
-            {attestations?.length > 0 ? (
+            {attestations?.bounty.length > 0 ? (
               <p className="text-white">
-                {attestations[0].schema.description || ''}
+                {attestations?.bounty.data.description || ''}
               </p>
             ) : (
               <>
@@ -223,8 +218,10 @@ export default function Explorer() {
           <div className="flex flex-col gap-2">
             <h2 className="text-xl text-white mb-2">Bug reports</h2>
             <div className="text-white flex justify-center flex-col gap-3 w-full">
-              <p className="text-white">No bugs submitted</p>
-              {attestations?.length < 2 && (
+              {attestations?.reports.length === 0 && (
+                <p className="text-white">No bugs submitted</p>
+              )}
+              {attestations?.bounty.length > 0 && (
                 <Button
                   onClick={() => {
                     const modal: any =
@@ -235,6 +232,15 @@ export default function Explorer() {
                   Report a bug
                 </Button>
               )}
+              <Button
+                onClick={() => {
+                  const modal: any =
+                    document.getElementById('create-bug-modal');
+                  modal?.showModal() as any;
+                }}
+              >
+                Report a bug
+              </Button>
             </div>
           </div>
         </Card>
